@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitHub Copilot: Enterprise overview</title>
+<style>
+:root{
+  --bg:#080d17;--bg2:#101824;--bg3:#1a2433;--line:#2a3545;--fg:#edf3fb;--mut:#aebacc;
+  --acc:#a371f7;--acc2:#58a6ff;--ok:#62d184;--warn:#e3b341;--pink:#db61a2;--teal:#62d4d8;
+  --r:16px;--maxw:1240px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+a{color:#80bfff;text-decoration:none}a:hover{text-decoration:underline}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #bba7ff;outline-offset:3px}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+h1,h2,h3{line-height:1.2;margin:0 0 .5em}
+h2{font-size:clamp(27px,3vw,34px);letter-spacing:-.025em}
+h3{font-size:18px}
+p{margin:0 0 .8em}
+.mut{color:var(--mut)}
+.small{font-size:13px}
+.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:9px}
+
+/* nav */
+.skip-link{position:fixed;left:12px;top:-60px;z-index:100;background:#fff;color:#111827;padding:9px 14px;border-radius:8px}
+.skip-link:focus{top:12px}
+nav.top{position:sticky;top:0;z-index:50;background:rgba(8,13,23,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;align-items:center;gap:14px;height:70px}
+.brand{display:flex;flex-shrink:0;align-items:center;gap:10px;font-weight:700;white-space:nowrap;color:var(--fg);line-height:1.15}
+.brand:hover{text-decoration:none}
+.brand .dot{width:34px;height:34px;display:grid;place-items:center;border:1px solid #9a8cff;border-radius:11px;background:linear-gradient(145deg,#6745cc,#3264bd);box-shadow:0 0 20px rgba(137,87,229,.25)}
+.brand .dot svg{width:20px;height:20px}
+.brand small{display:block;color:var(--mut);font-weight:500;font-size:10px;letter-spacing:.04em;margin-top:3px}
+.navlinks{display:flex;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{color:var(--mut);padding:7px 10px;border-radius:8px;font-size:13px;white-space:nowrap}
+.navlinks a:hover,.navlinks a.on{color:var(--fg);background:var(--bg3);text-decoration:none}
+.navmore{position:relative;flex-shrink:0;background:none;border:0;padding:0;margin:0}
+.navmore summary{list-style:none;color:var(--mut);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:13px;font-weight:500;white-space:nowrap}
+.navmore summary::-webkit-details-marker{display:none}
+.navmore summary::after{content:"⌄";margin-left:7px}
+.nav-label-short{display:none}
+.navmore[open] summary{color:var(--fg);border-color:#6e5aaa}
+.nav-popover{position:absolute;right:0;top:calc(100% + 10px);width:225px;padding:8px;border:1px solid var(--line);border-radius:12px;background:#111a28;box-shadow:0 18px 45px rgba(0,0,0,.4)}
+.nav-popover a{display:block;padding:7px 9px;border-radius:7px;color:var(--mut);font-size:13px}
+.nav-popover a:hover,.nav-popover a:focus-visible{color:var(--fg);background:var(--bg3);text-decoration:none}
+.nav-popover .mobile-print{display:none;width:100%;margin-top:5px;text-align:left}
+.lang{display:flex;flex-shrink:0;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.lang button{background:none;border:0;color:var(--mut);padding:6px 11px;font:inherit;font-size:13px;cursor:pointer}
+.lang button.on{background:#6943b8;color:#fff}
+.print{background:none;border:1px solid var(--line);color:var(--mut);border-radius:9px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+.storage-notice{padding:9px 22px;background:#372d18;color:#ffe4a3;text-align:center;font-size:13px}
+
+/* hero */
+header.hero{position:relative;overflow:hidden;padding:62px 0 56px;background:radial-gradient(750px 480px at 12% 1%,rgba(105,60,184,.22),transparent 70%),radial-gradient(690px 470px at 91% 13%,rgba(31,95,177,.24),transparent 70%),var(--bg)}
+header.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.24;background-image:linear-gradient(rgba(139,160,197,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(139,160,197,.08) 1px,transparent 1px);background-size:50px 50px;mask-image:linear-gradient(#000,transparent 52%)}
+header.hero .wrap{position:relative}
+.hero-main{display:grid;grid-template-columns:1.03fr .97fr;gap:48px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;margin-bottom:24px;padding:6px 11px;border:1px solid #4d436c;border-radius:999px;background:rgba(128,87,204,.1);color:#d5c6ff;font-size:11px;letter-spacing:.1em;font-weight:700;text-transform:uppercase}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:#c9a9ff;box-shadow:0 0 14px #b58aff}
+header.hero h1{font-size:clamp(46px,5.3vw,68px);letter-spacing:-.055em;line-height:1.05;max-width:650px;margin-bottom:20px}
+header.hero h1 span{background:linear-gradient(90deg,#c9adff,#93baff,#74ddd9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:18px;line-height:1.7;color:#c5d0df;max-width:570px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:28px}
+.hero-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:46px;padding:10px 17px;border-radius:9px;font-weight:650;font-size:14px}
+.hero-button:hover{text-decoration:none;transform:translateY(-1px)}
+.hero-button.primary{color:#121329;background:linear-gradient(105deg,#d9c8ff,#a6c8ff);box-shadow:0 8px 26px rgba(137,87,229,.18)}
+.hero-button.secondary{color:var(--fg);border:1px solid #4a5870;background:rgba(16,24,36,.75)}
+.hero-meta{display:flex;align-items:center;gap:9px;color:var(--mut);font-size:12px;margin:22px 0 0}
+.hero-meta::before{content:"";width:6px;height:6px;flex:none;border-radius:50%;background:var(--teal)}
+.hero-visual{position:relative;min-width:0;padding:30px 12px 52px}
+.hero-visual::before{content:"";position:absolute;inset:8% 0 14%;border-radius:50%;background:linear-gradient(130deg,rgba(149,88,255,.25),rgba(47,129,247,.12));filter:blur(60px);pointer-events:none}
+.scene-window{position:relative;overflow:hidden;border:1px solid #43506a;border-radius:17px;background:#0b111c;box-shadow:0 30px 90px rgba(0,0,0,.45),0 0 0 7px rgba(142,125,203,.045)}
+.scene-chrome{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid #293345;background:#151d2b;font-size:11px;color:#aab8ca}
+.scene-dots{display:flex;gap:5px}
+.scene-dots i{width:7px;height:7px;border-radius:50%;background:#617087}
+.scene-chrome strong{color:#e6edf3;font-size:12px}
+.scene-status{margin-left:auto;color:#a3adc0;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
+.scene-tabs{display:flex;gap:22px;padding:10px 16px 0;border-bottom:1px solid #273143;color:#8392a8;font-size:11px}
+.scene-tabs span{padding:0 0 9px}
+.scene-tabs span:first-child{color:#e6edf3;border-bottom:2px solid #a371f7}
+.scene-body{display:grid;grid-template-columns:1.05fr .95fr;min-height:220px}
+.scene-editor,.scene-chat{min-width:0;padding:16px}
+.scene-editor{border-right:1px solid #273143}
+.scene-file{font-size:11px;color:#c6d1df;margin-bottom:15px}
+.scene-file span{color:#7d8ca2;font-size:10px;float:right}
+.scene-code{margin:0;color:#c9d2df;font:11px/1.9 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre;overflow:hidden}
+.scene-code .line{color:#728198}
+.scene-code .purple{color:#c6a9ff}
+.scene-code .green{color:#8de4ad}
+.scene-diff{display:flex;gap:8px;align-items:center;margin-top:17px;padding:8px;border-radius:7px;background:rgba(47,129,94,.12);color:#a7e6bf;font-size:10px}
+.scene-diff i{font-style:normal;font-weight:700}
+.scene-agent-heading{display:flex;align-items:center;gap:7px;font-size:12px}
+.scene-agent-icon{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:#6342a8;color:#fff;font-size:11px}
+.scene-agent-mode{margin-left:auto;color:#aab7ca;font-size:10px}
+.scene-chat-bubble{margin:14px 0 12px;padding:10px;border:1px solid #334054;border-radius:9px;background:#151f2e;color:#c9d5e4;font-size:11px;line-height:1.5}
+.scene-work{display:flex;gap:7px;align-items:center;margin:8px 0;color:#b9c9d6;font-size:10px}
+.scene-tick{color:#83dfa0;font-weight:700}
+.scene-waiting{display:inline-block;margin-top:9px;padding:4px 7px;border-radius:6px;background:#21314a;color:#c0dcff;font-size:10px}
+.scene-bottom{display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid #273143;color:#9daec2;font-size:10px}
+.scene-bottom b{color:#d6e3f2;font-weight:600}
+.scene-bottom .sep{color:#6e8098}
+.scene-float{position:absolute;right:-5px;top:calc(100% - 44px);display:flex;align-items:center;gap:10px;padding:12px 15px;border:1px solid #53627a;border-radius:12px;background:#172435;box-shadow:0 16px 45px rgba(0,0,0,.35)}
+.scene-float-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:rgba(78,182,135,.16);color:#8ae3b1}
+.scene-float b,.scene-float span{display:block}
+.scene-float b{font-size:11px}
+.scene-float span{color:#aebfd1;font-size:10px}
+.visual-caption{position:absolute;left:12px;bottom:12px;color:#9baac0;font-size:11px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:48px}
+.stat{display:flex;align-items:center;gap:13px;min-width:0;background:rgba(16,24,36,.68);border:1px solid var(--line);border-radius:12px;padding:15px;color:var(--fg)}
+.stat:hover{border-color:#7763a5;text-decoration:none;background:#151e2d}
+.stat b{flex:none;font-size:25px;line-height:1;color:#d6c6ff;letter-spacing:-.04em}
+.stat span{color:#c0ccdb;font-size:12px;line-height:1.45}
+.hero-note{max-width:980px;margin:13px 0 0;color:var(--mut);font-size:12px}
+.pathways{margin-top:75px}
+.pathways-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:20px}
+.pathways-head h2{margin-bottom:5px}
+.pathways-head p{margin:0;max-width:650px}
+.pathways-head>a{white-space:nowrap;font-size:13px;font-weight:600}
+.tldr{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.role-path{position:relative;display:flex;flex-direction:column;min-height:178px;padding:20px;border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(145deg,#151e2c,#101722);color:var(--fg)}
+.role-path:hover{border-color:#7763a5;text-decoration:none;transform:translateY(-2px)}
+.role-top{display:flex;align-items:center;justify-content:space-between;color:#a894ed;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.role-number{display:grid;place-items:center;width:29px;height:29px;border:1px solid #554b76;border-radius:9px;color:#d7c6ff;letter-spacing:0}
+.role-path h3{margin:13px 0 6px;font-size:17px}
+.role-path p{color:var(--mut);font-size:13px;line-height:1.55;margin-bottom:12px}
+.role-action{margin-top:auto;color:#bba6ff;font-size:12px;font-weight:650}
+.guide-intro{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-top:75px;padding-top:32px;border-top:1px solid var(--line)}
+.guide-intro h2{margin-bottom:4px}
+.guide-intro p{margin:0}
+.guide-intro a{white-space:nowrap;font-size:13px;font-weight:600}
+
+section{padding:70px 0;border-top:1px solid var(--line)}
+section:nth-of-type(even){background:#0c131e}
+.sechead{max-width:820px;margin-bottom:26px}
+
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:19px;position:relative}
+.card .ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:18px;margin-bottom:10px;background:var(--bg3);border:1px solid var(--line)}
+.card ul{margin:.3em 0 0;padding-left:18px}.card li{margin:.2em 0}
+.src{font-size:12px;margin-top:8px;display:inline-block}
+.src::before{content:"↗ "}
+.pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mut);margin:0 4px 4px 0}
+.pill.ga{color:var(--ok);border-color:rgba(98,209,132,.5)}
+.pill.pv{color:var(--warn);border-color:rgba(227,179,65,.5)}
+.pill.vr{color:#8b949e}
+
+/* ladder */
+.ladder{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-items:end;margin-top:10px}
+.rung{min-width:0;overflow-wrap:anywhere;background:linear-gradient(180deg,rgba(137,87,229,.25),rgba(47,129,247,.08));border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13px}
+.rung b{display:block;font-size:14px;margin-bottom:4px}
+.axis{display:flex;justify-content:space-between;color:var(--mut);font-size:12px;margin-top:8px}
+.axis span:nth-child(2){flex:1;margin:0 12px;border-top:1px dashed var(--line);transform:translateY(9px)}
+
+/* surfaces map */
+.matrix{width:100%;border-collapse:collapse;font-size:13px}
+.matrix th,.matrix td{border-bottom:1px solid var(--line);padding:9px 8px;text-align:center}
+.matrix th:first-child,.matrix td:first-child{text-align:left}
+.matrix thead th{color:var(--mut);font-weight:600;position:sticky;top:70px;background:var(--bg)}
+.y{color:var(--ok);font-weight:700}.p{color:var(--warn);font-weight:700}.n{color:#484f58}
+
+/* tabs */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tabs button{background:var(--bg2);border:1px solid var(--line);color:var(--mut);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--acc);border-color:var(--acc);color:#fff}
+.stage{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+.stage-features{grid-column:1/-1;margin-top:8px}
+.stage-features-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:6px 0 14px}
+.stage-features-head h3{margin:0}
+.stage-features-head p{margin:0}
+.stage-feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stage-feature{min-width:0;padding:16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,#151e2c,#101722)}
+.stage-feature h4{font-size:15px;line-height:1.3;margin:7px 0}
+.stage-feature p{font-size:13px;line-height:1.55;color:var(--mut);margin:0}
+.stage-feature .src{margin-top:10px}
+.stage-shared{margin:20px 0 0;padding:16px}
+.stage-shared summary{margin-bottom:0}
+.stage-shared[open] summary{margin-bottom:16px}
+.feature-stages{font-size:12px;color:var(--mut);margin-top:9px}
+.pill.product{color:#b6cdf2;border-color:#475d7a}
+.lifecycle-note{margin:0 0 18px;padding:12px 15px;border:1px solid #485d78;border-radius:12px;background:#111b2b;color:#c2d0e1;font-size:13px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:14px}
+.kv dt{color:var(--mut)}.kv dd{margin:0}
+.prompt{background:#010409;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d2a8ff;white-space:pre-wrap}
+
+/* mock windows */
+.win{background:#010409;border:1px solid var(--line);border-radius:12px;overflow:hidden;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}
+.win .bar{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--bg2);border-bottom:1px solid var(--line);font-family:inherit;color:var(--mut);font-size:12px}
+.win .bar i{width:10px;height:10px;border-radius:50%;background:#30363d;display:inline-block}
+.win .body{padding:12px 14px;min-height:190px}
+.ghost{color:#6e7681}.kw{color:#ff7b72}.fn{color:#d2a8ff}.st{color:#a5d6ff}.cm{color:#8b949e}.ok{color:var(--ok)}.wa{color:var(--warn)}
+.chatb{margin-top:8px;padding:8px;border:1px solid var(--line);border-radius:8px;color:#c9d1d9;font-family:-apple-system,Segoe UI,sans-serif}
+.label{font-size:11px;color:var(--mut);margin-top:6px}
+
+/* models */
+.provs{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
+.prov{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;text-align:left;color:var(--fg);font:inherit}
+.prov b{display:block;font-size:22px}
+.prov.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.tools input{background:var(--bg2);border:1px solid var(--line);border-radius:9px;color:var(--fg);padding:8px 12px;font:inherit;min-width:240px;max-width:100%}
+.filter-group{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.filter-caption{color:var(--mut);font-size:12px}
+.chip{background:var(--bg2);border:1px solid var(--line);color:var(--mut);border-radius:999px;padding:5px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+.chip.on{color:#fff;background:#245fab;border-color:#538fe3}
+.empty-state{grid-column:1/-1;color:var(--mut);padding:18px;border:1px dashed var(--line);border-radius:12px}
+table.data{width:100%;border-collapse:collapse;font-size:14px}
+table.data th,table.data td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.data th{color:var(--mut);font-weight:600;font-size:12.5px}
+.bar5{display:inline-block;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--acc),var(--acc2));vertical-align:middle}
+
+/* fusion */
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.level{border:1px solid var(--line);border-radius:var(--r);padding:16px;background:var(--bg2)}
+.level .meter{height:8px;border-radius:4px;background:var(--bg3);margin:8px 0 10px;overflow:hidden}
+.level .meter i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--acc))}
+.flows{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.flow{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--bg2)}
+.flow svg{width:100%;height:150px;display:block}
+.node{fill:#1f2630;stroke:#484f58}
+.nodeA{fill:rgba(137,87,229,.25);stroke:#8957e5}
+.nodeB{fill:rgba(57,197,207,.18);stroke:#39c5cf}
+.nodeC{fill:rgba(63,185,80,.18);stroke:#3fb950}
+.edge{stroke:#6e7681;stroke-width:1.6;fill:none;stroke-dasharray:5 5;animation:dash 1.2s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-20}}
+svg text{fill:#e6edf3;font:12px -apple-system,Segoe UI,sans-serif;text-anchor:middle;dominant-baseline:middle}
+.callout{border:1px solid rgba(137,87,229,.5);background:rgba(137,87,229,.08);border-radius:var(--r);padding:14px 16px;margin-top:16px}
+
+/* pipeline */
+.pipe{display:flex;gap:0;align-items:stretch;overflow-x:auto;padding:6px 0 4px}
+.step{flex:1;min-width:140px;background:var(--bg2);border:1px solid var(--line);padding:12px;position:relative;font-size:13px}
+.step:first-child{border-radius:12px 0 0 12px}.step:last-child{border-radius:0 12px 12px 0}
+.step b{display:block;font-size:13.5px;margin-bottom:4px}
+.step .n2{font-size:11px;color:var(--teal);font-weight:700}
+.step+.step{border-left:0}
+
+/* phases */
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;counter-reset:ph}
+.phase{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:16px;border-top:4px solid var(--acc)}
+.phase:nth-child(2){border-top-color:var(--acc2)}.phase:nth-child(3){border-top-color:var(--teal)}.phase:nth-child(4){border-top-color:var(--ok)}
+.phase h3::before{counter-increment:ph;content:counter(ph) ". ";color:var(--mut)}
+.phase .kpi{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:var(--mut)}
+
+details{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:8px}
+summary{cursor:pointer;font-weight:600}
+details p{margin:.6em 0 0;color:#c9d1d9}
+
+.srcs{columns:2;column-gap:28px;font-size:13.5px}
+.srcs h3{break-after:avoid;font-size:14px;margin-top:10px;color:var(--mut)}
+.srcs ul{margin:0 0 10px;padding-left:18px}
+footer{padding:30px 0 60px;color:var(--mut);font-size:13px;border-top:1px solid var(--line)}
+.hide{display:none!important}
+.print-only{display:none}
+
+@media (max-width:1100px){
+  .navlinks{display:none}
+  .navmore{margin-left:auto}
+}
+@media (max-width:980px){
+  .g4,.g5,.stats,.provs{grid-template-columns:repeat(2,1fr)}
+  .g3,.levels,.flows,.phases,.tldr{grid-template-columns:1fr 1fr}
+  .stage{grid-template-columns:1fr}
+  .stage-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ladder{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .hero-main{gap:25px}
+  header.hero h1{font-size:clamp(39px,5.5vw,55px)}
+  .scene-body{grid-template-columns:1fr}
+  .scene-editor{border-right:0;border-bottom:1px solid #273143}
+}
+@media (max-width:760px){
+  header.hero{padding-top:45px}
+  .hero-main{grid-template-columns:1fr}
+  .hero-visual{max-width:590px;width:100%;margin:0 auto}
+  .scene-body{grid-template-columns:1.05fr .95fr}
+  .scene-editor{border-right:1px solid #273143;border-bottom:0}
+  .pathways{margin-top:58px}
+  .pathways-head,.guide-intro{align-items:start;flex-direction:column}
+  nav.top .wrap>.print{display:none}
+  .nav-popover .mobile-print{display:block}
+}
+@media (max-width:640px){
+  .g2,.g3,.g4,.g5,.levels,.flows,.phases,.tldr{grid-template-columns:1fr}
+  .stage-feature-grid{grid-template-columns:1fr}
+  .stage-features-head{align-items:start;flex-direction:column;gap:4px}
+  .stats{grid-template-columns:1fr 1fr;gap:8px}
+  .ladder{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .srcs{columns:1}
+  .kv{grid-template-columns:1fr}
+  .wrap{padding:0 16px}
+  nav.top .wrap{gap:8px}
+  .brand small{display:none}
+  .brand .dot{width:30px;height:30px}
+  .navmore summary{padding:6px 8px}
+  .lang button{padding:6px 8px}
+  header.hero h1{font-size:clamp(37px,9vw,50px)}
+  .lead{font-size:16px}
+  .hero-button{flex:1}
+  .hero-visual{padding-bottom:100px}
+  .scene-float{top:calc(100% - 60px)}
+  .visual-caption{bottom:69px}
+  .stat{padding:12px;gap:9px}
+  .stat b{font-size:21px}
+  .stat span{font-size:11px}
+  .role-path{min-height:0}
+  .guide-intro{margin-top:50px}
+  section{padding:52px 0}
+}
+@media (max-width:420px){
+  .brand{font-size:12px;gap:6px}
+  .brand .dot{width:27px;height:27px}
+  .navmore summary{font-size:12px}
+  .nav-label-long{display:none}
+  .nav-label-short{display:inline}
+  .hero-visual{padding-left:0;padding-right:0}
+  .scene-body{grid-template-columns:1fr}
+  .scene-editor{border-right:0;border-bottom:1px solid #273143}
+  .scene-float{right:0}
+  .scene-chat{padding:12px 16px}
+  .visual-caption{left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .edge{animation:none}
+  .hero-button:hover,.role-path:hover{transform:none}
+}
+@media print{
+  nav.top,.skip-link,.storage-notice,.hero-actions,.hero-visual,.tools,.provs,.tabs,.print,.lang,.pathways-head>a,.role-action,.guide-intro>a{display:none!important}
+  body{background:#fff;color:#000}
+  header.hero::before{display:none}
+  section,header.hero{background:none!important;border-color:#ccc;break-inside:auto}
+  header.hero{padding:20px 0}
+  .hero-main{display:block}
+  header.hero h1 span{background:none;color:#000;-webkit-text-fill-color:#000}
+  .eyebrow,.card,.stat,.role-path,.level,.flow,.phase,.step,details,.rung,.callout,.lifecycle-note,.stage-feature{background:#fff!important;border-color:#bbb!important;color:#111!important}
+  .lead,.mut,.stat span,.stat b,.role-path p,.hero-note,.hero-meta,details p,.kpi{color:#333!important}
+  .kicker,.role-top,.role-number,.step .n2{color:#4b3489!important}
+  .pill,.pill.ga,.pill.pv,.pill.vr{color:#333!important;border-color:#999!important}
+  .stats,.phases,.flows,.g3,.g4,.g5{grid-template-columns:repeat(2,1fr)}
+  .tldr{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stat,.card,.role-path,.level,.flow,.phase,.step,details,.rung,.print-only article,.print-only tr{break-inside:avoid}
+  h2,h3{break-after:avoid}
+  a{color:#0645ad}
+  details{display:block}details>*{display:block}
+  .prompt,.win,.win .bar{background:#fff!important;color:#222!important;border-color:#bbb}
+  .prompt *, .win *{color:#222!important}
+  .pipe{overflow:visible;flex-wrap:wrap}
+  #stage,#mtable,#fgrid{display:none!important}
+  .print-only{display:block!important}
+  .print-only h3{margin-top:18px}
+  .print-only table{width:100%;border-collapse:collapse;font-size:11px}
+  .print-only th,.print-only td{padding:5px;border-bottom:1px solid #bbb;text-align:left;vertical-align:top}
+  .print-only th:first-child{width:24%}
+  .print-only th:nth-child(2){width:14%}
+  .print-only th:nth-child(3){width:10%}
+  .print-stage-feature{border-top:1px solid #ddd;padding:5px 0;break-inside:avoid;font-size:12px;line-height:1.35}
+  .print-stage-feature p{margin:3px 0}
+  .print-stage-feature .src{font-size:11px;margin-top:0}
+  #print-features article{font-size:12px;line-height:1.35;border-top:1px solid #ddd;padding:5px 0}
+  #print-features h3{font-size:14px;margin:5px 0}
+  #print-features p{margin:3px 0}
+}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main" data-i="skip"></a>
+<nav class="top" data-a="navLabel"><div class="wrap">
+  <a class="brand" href="#top">
+    <span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.7"><rect x="3.5" y="5" width="17" height="14" rx="5"/><path d="M8 11.5h.01M16 11.5h.01M9 15h6" stroke-linecap="round" stroke-width="2.2"/></svg></span>
+    <span>GitHub Copilot<small data-i="brandNote"></small></span>
+  </a>
+  <div class="navlinks" id="navlinks"></div>
+  <details class="navmore" id="navmore">
+    <summary><span class="nav-label-long" data-i="navMore"></span><span class="nav-label-short" data-i="navMoreShort"></span></summary>
+    <div class="nav-popover">
+      <div id="navall"></div>
+      <button class="print mobile-print" onclick="window.print()" data-i="print"></button>
+    </div>
+  </details>
+  <div class="lang" role="group" data-a="languageLabel">
+    <button id="btn-en" class="on" aria-pressed="true">EN</button>
+    <button id="btn-de" aria-pressed="false">DE</button>
+  </div>
+  <button class="print" onclick="window.print()" data-i="print">Print</button>
+</div></nav>
+<div class="storage-notice" id="storage-notice" role="status" hidden></div>
+
+<header class="hero" id="top">
+  <div class="wrap hero-main">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span><span data-i="heroKicker"></span></div>
+      <h1 data-ih="heroTitle"></h1>
+      <p class="lead" data-i="heroLead"></p>
+      <div class="hero-actions">
+        <a class="hero-button primary" href="#sdlc"><span data-i="heroPrimary"></span><span aria-hidden="true">→</span></a>
+        <a class="hero-button secondary" href="#models"><span data-i="heroSecondary"></span><span aria-hidden="true">↗</span></a>
+      </div>
+      <p class="hero-meta" data-i="heroMeta"></p>
+    </div>
+    <div class="hero-visual" role="img" data-a="sceneLabel">
+      <div class="scene-window" aria-hidden="true">
+        <div class="scene-chrome">
+          <span class="scene-dots"><i></i><i></i><i></i></span>
+          <strong>GitHub Copilot</strong>
+          <span class="scene-status" data-i="sceneWorkspace"></span>
+        </div>
+        <div class="scene-tabs"><span>IDE</span><span>Terminal</span><span>GitHub</span></div>
+        <div class="scene-body">
+          <div class="scene-editor">
+            <div class="scene-file">checkout.ts <span>TypeScript</span></div>
+            <pre class="scene-code"><span class="line">01</span> <span class="purple">async function</span> checkout() {
+<span class="line">02</span>   const order = await load();
+<span class="line">03</span>   <span class="green">validateOrder(order);</span>
+<span class="line">04</span>   return order;
+<span class="line">05</span> }</pre>
+            <div class="scene-diff"><i>+</i><span data-i="sceneDiff"></span></div>
+          </div>
+          <div class="scene-chat">
+            <div class="scene-agent-heading"><span class="scene-agent-icon">✦</span><b>Copilot</b><span class="scene-agent-mode">Agent</span></div>
+            <div class="scene-chat-bubble" data-i="scenePrompt"></div>
+            <div class="scene-work"><span class="scene-tick">✓</span><span data-i="sceneCheck1"></span></div>
+            <div class="scene-work"><span class="scene-tick">✓</span><span data-i="sceneCheck2"></span></div>
+            <div class="scene-waiting" data-i="sceneReview"></div>
+          </div>
+        </div>
+        <div class="scene-bottom"><b>IDE</b><span class="sep">→</span><b>Terminal</b><span class="sep">→</span><b>GitHub</b><span class="sep">/</span><span data-i="sceneFooter"></span></div>
+      </div>
+      <div class="scene-float" aria-hidden="true">
+        <span class="scene-float-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 19 6v5c0 4.5-2.8 7.5-7 10-4.2-2.5-7-5.5-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <span><b data-i="sceneHuman"></b><span data-i="sceneHumanDetail"></span></span>
+      </div>
+      <span class="visual-caption" data-i="sceneCaption"></span>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="stats" id="stats"></div>
+    <p class="hero-note" data-ih="heroNote"></p>
+    <div class="pathways">
+      <div class="pathways-head">
+        <div><div class="kicker" data-i="pathsKicker"></div><h2 data-i="pathsTitle"></h2><p class="mut" data-i="pathsLead"></p></div>
+        <a href="#features"><span data-i="pathsAll"></span> <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="tldr" id="tldr"></div>
+    </div>
+    <div class="guide-intro">
+      <div><div class="kicker" data-i="guideKicker"></div><h2 data-i="guideTitle"></h2><p class="mut" data-i="guideLead"></p></div>
+      <a href="#surfaces"><span data-i="guideLink"></span> <span aria-hidden="true">↓</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<section id="surfaces"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sSurfK"></div><h2 data-i="sSurfH"></h2><p class="mut" data-i="sSurfP"></p></div>
+  <div class="grid g5" id="surfCards"></div>
+  <h3 style="margin-top:34px" data-i="ladderH"></h3>
+  <p class="mut small" data-i="ladderP"></p>
+  <div class="ladder" id="ladder"></div>
+  <div class="axis"><span data-i="axisL"></span><span></span><span data-i="axisR"></span></div>
+  <h3 style="margin-top:34px" data-i="matrixH"></h3>
+  <div style="overflow-x:auto"><table class="matrix" id="matrix"></table></div>
+  <p class="small mut" data-ih="matrixNote"></p>
+</div></section>
+
+<section id="sdlc"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sSdlcK"></div><h2 data-i="sSdlcH"></h2><p class="mut" data-i="sSdlcP"></p></div>
+  <div class="lifecycle-note" data-ih="lifecycleNote"></div>
+  <div class="tabs" role="tablist" id="tabs" data-a="stagesLabel"></div>
+  <div class="stage" id="stage" role="tabpanel"></div>
+  <div class="print-only" id="print-stages"></div>
+  <h3 style="margin-top:34px" data-i="lookH"></h3>
+  <p class="small mut" data-i="lookP"></p>
+  <div class="grid g3" id="mocks"></div>
+</div></section>
+
+<section id="models"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sModK"></div><h2 data-i="sModH"></h2><p class="mut" data-ih="sModP"></p></div>
+  <div class="provs" id="provs"></div>
+  <div class="tools">
+    <input id="mq" type="search" data-a="searchModels">
+    <span class="small mut" id="mcount" aria-live="polite"></span>
+  </div>
+  <div style="overflow-x:auto"><table class="data" id="mtable"></table></div>
+  <div class="print-only" id="print-models"></div>
+  <div class="grid g3" style="margin-top:18px" id="modelNotes"></div>
+</div></section>
+
+<section id="fusion"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sFusK"></div><h2 data-i="sFusH"></h2><p class="mut" data-ih="sFusP"></p></div>
+  <div class="levels" id="levels"></div>
+  <h3 data-i="flowsH"></h3>
+  <div class="flows" id="flows"></div>
+  <div class="grid g3" style="margin-top:16px" id="fusionFacts"></div>
+  <div class="callout small" data-ih="fusionLineage"></div>
+</div></section>
+
+<section id="agents"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sAgK"></div><h2 data-i="sAgH"></h2><p class="mut" data-ih="sAgP"></p></div>
+  <div style="overflow-x:auto"><table class="data" id="agtable"></table></div>
+  <div class="callout" data-ih="agentHQ"></div>
+</div></section>
+
+<section id="native"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sNatK"></div><h2 data-i="sNatH"></h2><p class="mut" data-i="sNatP"></p></div>
+  <h3 data-i="pipeH"></h3>
+  <div class="pipe" id="pipe"></div>
+  <div class="grid g4" style="margin-top:20px" id="nativeCards"></div>
+</div></section>
+
+<section id="features"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sFeatK"></div><h2 data-i="sFeatH"></h2><p class="mut" data-i="sFeatP"></p></div>
+  <div class="tools" id="ftools"></div>
+  <div class="grid g3" id="fgrid"></div>
+  <div class="print-only" id="print-features"></div>
+</div></section>
+
+<section id="governance"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sGovK"></div><h2 data-i="sGovH"></h2><p class="mut" data-i="sGovP"></p></div>
+  <div class="grid g3" id="govCards"></div>
+  <div class="callout small" data-ih="billing"></div>
+</div></section>
+
+<section id="rollout"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sRollK"></div><h2 data-i="sRollH"></h2><p class="mut" data-i="sRollP"></p></div>
+  <div class="phases" id="phases"></div>
+  <h3 style="margin-top:30px" data-i="e2eH"></h3>
+  <div class="pipe" id="e2e"></div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <div class="sechead"><div class="kicker">FAQ</div><h2 data-i="sFaqH"></h2></div>
+  <div id="faqs"></div>
+</div></section>
+
+<section id="sources"><div class="wrap">
+  <div class="sechead"><div class="kicker" data-i="sSrcK"></div><h2 data-i="sSrcH"></h2><p class="mut small" data-i="sSrcP"></p></div>
+  <div class="srcs" id="srcs"></div>
+</div></section>
+</main>
+
+<footer><div class="wrap" data-ih="footer"></div></footer>
+
+<script>
+const G='https://docs.github.com/en/enterprise-cloud@latest/copilot';
+const U={
+ ide:G+'/concepts/copilot-surfaces/copilot-in-ides',
+ sugg:G+'/how-tos/copilot-in-your-ide/copilot-for-common-tasks/get-ide-code-suggestions',
+ agentMode:G+'/how-tos/copilot-in-your-ide/use-copilot-agents/use-agent-mode',
+ cli:G+'/concepts/copilot-surfaces/copilot-cli',
+ app:G+'/concepts/copilot-surfaces/github-copilot-app',
+ cloud:G+'/how-tos/use-copilot-agents/cloud-agent/use-cloud-agent-on-github',
+ review:G+'/concepts/agent-capabilities/agent-powered-workflows-and-operations/code-review',
+ spaces:G+'/how-tos/copilot-on-github/customize-copilot/copilot-spaces/create-copilot-spaces',
+ matrix:G+'/reference/copilot-feature-matrix',
+ models:G+'/reference/ai-models/supported-models',
+ compare:G+'/reference/ai-models/model-comparison',
+ third:G+'/concepts/agent-capabilities/about-agents/about-third-party-coding-agents',
+ hqBlog:'https://github.blog/news-insights/company-news/pick-your-agent-use-claude-and-codex-on-agent-hq/',
+ fusionCl:'https://github.blog/changelog/2026-10-28-route-and-orchestrate-models-with-github-copilot-fusion',
+ fusion:'https://docs.github.com/copilot/concepts/models/copilot-fusion',
+ hydraCl:'https://github.blog/changelog/2026-10-14-hydrafusion-updates-and-new-max-option',
+ jbCl:'https://github.blog/changelog/2026-10-28-github-copilot-in-jetbrains-universe-releases',
+ weekly:'https://github.blog/changelog/2026-10-02-github-copilot-weekly-releases-september-28',
+ dyn:'https://docs.github.com/copilot/how-tos/use-copilot-agents/use-dynamic-workflows',
+ cu:'https://docs.github.com/copilot/concepts/agents/computer-use',
+ vsCl:'https://github.blog/changelog/2026-10-01-github-copilot-in-vs-code-september-2026-releases',
+ auto:'https://docs.github.com/copilot/concepts/models/auto-model-selection',
+ fusionAdmin:'https://docs.github.com/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-availability-of-default-models',
+ billing:G+'/concepts/billing-and-usage/organizations-and-enterprises/billing',
+ plans:G+'/get-started/plans',
+ metrics:G+'/concepts/billing-and-usage/copilot-usage-metrics/copilot-metrics',
+ dash:G+'/how-tos/administer-copilot/view-usage-and-adoption',
+ policies:'https://docs.github.com/en/copilot/concepts/policies',
+ audit:'https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-organization/review-activity/review-audit-logs',
+ quality:'https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/code-quality/code-quality',
+ resp:G+'/responsible-use/agents',
+ mcp:G+'/concepts/customizations/mcp',
+ instr:G+'/concepts/prompting-and-context/custom-instructions',
+ cheat:G+'/reference/customization-cheat-sheet',
+ issueDraft:G+'/how-tos/copilot-on-github/copilot-for-github-tasks/use-copilot-to-create-or-update-issues',
+ prSummary:G+'/how-tos/copilot-on-github/copilot-for-github-tasks/create-a-pr-summary',
+ memory:G+'/concepts/prompting-and-context/copilot-memory',
+ automations:G+'/concepts/agent-capabilities/agent-powered-workflows-and-operations/about-automations',
+ agenticWorkflows:G+'/concepts/agent-capabilities/agent-powered-workflows-and-operations/about-github-agentic-workflows',
+ agentMerge:'https://github.blog/changelog/2026-10-28-agent-merge-watches-and-fixes-pull-requests-in-the-cloud/',
+ projects:'https://github.blog/changelog/2026-10-28-github-copilot-app-universe-releases/',
+ codeReferences:G+'/how-tos/copilot-in-your-ide/copilot-for-common-tasks/find-matching-code',
+ integrations:G+'/concepts/agent-capabilities/choosing-and-delegating-agent-work/about-copilot-integrations',
+ plugins:G+'/concepts/customizations/plugins',
+ contentExclusion:G+'/concepts/security-governance-and-network-settings/content-exclusion',
+ byok:G+'/concepts/models/bring-your-own-key',
+ aiScan:'https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/code-scanning/ai-scan',
+ aiScanPr:'https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/code-scanning/ai-powered-security-detections',
+ aiScanRepo:'https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/code-scanning/ai-scan-for-repositories',
+ aiApp:'https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/code-scanning/ai-applications-scanning-for-pull-requests',
+ codeql:'https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/code-scanning/codeql/codeql-code-scanning',
+ autofix:'https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/code-scanning/autofix-for-code-scanning',
+ coverage:'https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/code-quality/automatic-code-coverage-setup',
+ securityAI:'https://docs.github.com/en/enterprise-cloud@latest/code-security/responsible-use/security-and-quality-ai-features',
+ pushProtection:'https://docs.github.com/en/enterprise-cloud@latest/code-security/concepts/secret-security/command-line-push-protection',
+ aiPush:'https://docs.github.com/en/enterprise-cloud@latest/code-security/how-tos/secure-your-secrets/prevent-future-leaks/enable-ai-push-protection',
+ securityExtension:'https://github.blog/changelog/2026-10-28-security-extension-for-the-github-copilot-app/',
+ agentSecurity:'https://github.blog/changelog/2025-10-28-copilot-coding-agent-now-automatically-validates-code-security-and-quality/',
+ sparkRetired:'https://github.blog/changelog/2026-08-04-upcoming-deprecation-of-github-spark-on-github-com/'
+};
+const D={
+ skip:{en:'Skip to the detailed guide',de:'Zum ausführlichen Überblick springen'},
+ navLabel:{en:'Guide navigation',de:'Navigation im Überblick'},
+ languageLabel:{en:'Language',de:'Sprache'},
+ brandNote:{en:'ENTERPRISE GUIDE',de:'ENTERPRISE-ÜBERBLICK'},
+ navMore:{en:'All topics',de:'Alle Themen'}, navMoreShort:{en:'Topics',de:'Themen'},
+ print:{en:'Print / PDF',de:'Drucken / PDF'},
+ heroKicker:{en:'The enterprise field guide',de:'Der Enterprise-Überblick'},
+ heroTitle:{en:'Meet GitHub Copilot.<br><span>From idea to pull request.</span>',de:'GitHub Copilot.<br><span>Von der Idee zum Pull Request.</span>'},
+ heroLead:{en:'AI assistance for the way your team works. Explore Copilot in your editor, terminal, and GitHub, from the first idea through code review.',de:'KI-Unterstützung für die Arbeitsweise Ihres Teams. Entdecken Sie Copilot im Editor, Terminal und auf GitHub, von der ersten Idee bis zum Code Review.'},
+ heroPrimary:{en:'Explore the lifecycle',de:'Lebenszyklus entdecken'},
+ heroSecondary:{en:'Explore the models',de:'Modelle entdecken'},
+ heroMeta:{en:'For enterprise teams · Reference snapshot 6 Nov 2026',de:'Für Enterprise-Teams · Referenzstand 6. Nov. 2026'},
+ heroNote:{en:'This guide focuses on GitHub Enterprise Cloud. Features and models vary by plan, client, and policy; previews can change. See the <a href="'+U.matrix+'" target="_blank" rel="noopener">IDE feature matrix</a> and <a href="'+U.models+'" target="_blank" rel="noopener">supported models</a>.',de:'Dieser Überblick gilt für GitHub Enterprise Cloud. Funktionen und Modelle hängen von Plan, Client und Richtlinien ab; Previews können sich ändern. Siehe <a href="'+U.matrix+'" target="_blank" rel="noopener">IDE-Feature-Matrix</a> und <a href="'+U.models+'" target="_blank" rel="noopener">unterstützte Modelle</a>.'},
+ sceneLabel:{en:'Illustrative Copilot workspace showing a code change, agent task, and review step.',de:'Illustrative Copilot-Oberfläche mit Codeänderung, Agent-Aufgabe und Review-Schritt.'},
+ sceneWorkspace:{en:'Workspace',de:'Arbeitsbereich'},
+ sceneDiff:{en:'Validation and tests',de:'Validierung und Tests'},
+ scenePrompt:{en:'Add validation and prepare this change for review.',de:'Validierung ergänzen und die Änderung für das Review vorbereiten.'},
+ sceneCheck1:{en:'Updated the code',de:'Code angepasst'},
+ sceneCheck2:{en:'Added a test',de:'Test ergänzt'},
+ sceneReview:{en:'Ready for review',de:'Bereit für das Review'},
+ sceneFooter:{en:'One connected workflow',de:'Ein verbundener Ablauf'},
+ sceneHuman:{en:'Human review',de:'Menschliches Review'},
+ sceneHumanDetail:{en:'Your team reviews the change',de:'Ihr Team prüft die Änderung'},
+ sceneCaption:{en:'Illustrative interface, not a screenshot',de:'Illustrative Oberfläche, kein Screenshot'},
+ pathsKicker:{en:'Start where it matters',de:'Hier beginnen'},
+ pathsTitle:{en:'One guide. Different starting points.',de:'Ein Überblick. Unterschiedliche Einstiege.'},
+ pathsLead:{en:'Choose a perspective, then explore the full guide below.',de:'Wählen Sie Ihre Perspektive und entdecken Sie danach den vollständigen Überblick.'},
+ pathsAll:{en:'Browse the feature catalog',de:'Funktionskatalog ansehen'},
+ guideKicker:{en:'The complete guide',de:'Der vollständige Überblick'},
+ guideTitle:{en:'Explore Copilot by topic',de:'Copilot nach Themen entdecken'},
+ guideLead:{en:'From everyday workflows to model choice, security, and rollout.',de:'Vom Arbeitsalltag über Modellauswahl und Sicherheit bis zur Einführung.'},
+ guideLink:{en:'Start with the surfaces',de:'Mit den Oberflächen beginnen'},
+ storageNotice:{en:'Your browser blocked local storage. The language choice will apply only to this page session.',de:'Ihr Browser blockiert lokalen Speicher. Die Sprachauswahl gilt nur für diese Seitensitzung.'},
+ sSurfK:{en:'Where Copilot runs',de:'Wo Copilot läuft'},
+ sSurfH:{en:'Five surfaces for the way you work',de:'Fünf Oberflächen für Ihre Arbeit'},
+ sSurfP:{en:'Choose the surface that fits the task. Available features, permissions, model access, and billing depend on the client, plan, and applicable policies.',de:'Wählen Sie die passende Oberfläche. Funktionen, Berechtigungen, Modellzugriff und Abrechnung hängen von Client, Plan und geltenden Richtlinien ab.'},
+ ladderH:{en:'The autonomy ladder',de:'Die Autonomie-Leiter'},
+ ladderP:{en:'Teams usually start on the left and move right as trust, tests and review practices mature.',de:'Teams starten meist links und gehen nach rechts, sobald Vertrauen, Tests und Review-Praxis wachsen.'},
+ axisL:{en:'Developer types, Copilot suggests',de:'Entwickler tippt, Copilot schlägt vor'},
+ axisR:{en:'Copilot works, developer reviews',de:'Copilot arbeitet, Entwickler prüft'},
+ matrixH:{en:'Capability by surface',de:'Funktionen je Oberfläche'},
+ matrixNote:{en:'● available &nbsp; ◐ preview or partial &nbsp; ○ not on this surface. This is a simplified view. Check the <a href="'+U.matrix+'" target="_blank" rel="noopener">IDE feature matrix</a> and <a href="'+U.fusion+'" target="_blank" rel="noopener">Fusion availability</a> for client-specific details.',de:'● verfügbar &nbsp; ◐ Preview oder teilweise &nbsp; ○ nicht auf dieser Oberfläche. Dies ist eine vereinfachte Sicht. Details je Client stehen in der <a href="'+U.matrix+'" target="_blank" rel="noopener">IDE-Feature-Matrix</a> und bei der <a href="'+U.fusion+'" target="_blank" rel="noopener">Fusion-Verfügbarkeit</a>.'},
+ sSdlcK:{en:'Lifecycle',de:'Lebenszyklus'},
+ sSdlcH:{en:'Copilot in each SDLC stage',de:'Copilot in jeder SDLC-Phase'},
+ sSdlcP:{en:'Choose a stage to see its practical features, a sample prompt, and the human checkpoint. Features can support more than one stage.',de:'Wählen Sie eine Phase für passende Funktionen, einen Beispiel-Prompt und den menschlichen Kontrollpunkt. Funktionen können mehrere Phasen unterstützen.'},
+ lifecycleNote:{en:'<b>Lifecycle references reviewed 12 Nov 2026.</b> Copilot capabilities and related GitHub security or quality products are labeled separately. Some require additional licenses, AI credits, or enablement; public-repository eligibility varies. Preview and client support can change. Check the <a href="'+U.matrix+'" target="_blank" rel="noopener">feature matrix</a>.',de:'<b>Quellen zum Lebenszyklus geprüft am 12. Nov. 2026.</b> Copilot-Funktionen und zugehörige GitHub-Sicherheits- oder Qualitätsprodukte sind getrennt gekennzeichnet. Manche benötigen zusätzliche Lizenzen, AI Credits oder eine Aktivierung; für öffentliche Repositories gelten teils andere Regeln. Preview und Client-Unterstützung können sich ändern. Siehe <a href="'+U.matrix+'" target="_blank" rel="noopener">Feature-Matrix</a>.'},
+ stageFeatures:{en:'Features for this stage',de:'Funktionen für diese Phase'},
+ stageCount:{en:'features mapped',de:'Funktionen zugeordnet'},
+ stageShared:{en:'Also useful across stages',de:'Auch phasenübergreifend nützlich'},
+ featureStages:{en:'Lifecycle',de:'Lebenszyklus'},
+ lookH:{en:'What it looks like',de:'So sieht es aus'},
+ lookP:{en:'Illustrative mock-ups of the three main surfaces.',de:'Illustrative Entwürfe der drei Hauptoberflächen.'},
+ sModK:{en:'Model choice',de:'Modellauswahl'},
+ sModH:{en:'Models from six providers',de:'Modelle von sechs Anbietern'},
+ sModP:{en:'The current reference includes models from OpenAI, Anthropic, Google, Microsoft, Moonshot AI, and xAI. Access varies by plan, client, and model policy. See the <a href="'+U.models+'" target="_blank" rel="noopener">supported models</a> page for the current list.',de:'Die aktuelle Referenz enthält Modelle von OpenAI, Anthropic, Google, Microsoft, Moonshot AI und xAI. Der Zugriff hängt von Plan, Client und Modellrichtlinie ab. Die aktuelle Liste steht unter <a href="'+U.models+'" target="_blank" rel="noopener">Supported Models</a>.'},
+ sFusK:{en:'Copilot Fusion (formerly HydraFusion)',de:'Copilot Fusion (vormals HydraFusion)'},
+ sFusH:{en:'Let Copilot route and combine models',de:'Copilot wählt und kombiniert Modelle'},
+ sFusP:{en:'Fusion is GA since 28 Oct 2026. It replaces Auto and picks a model, or a workflow of several models, per request based on the effort level you choose. <a href="'+U.fusionCl+'" target="_blank">Changelog</a> · <a href="'+U.fusion+'" target="_blank">Docs</a>',de:'Fusion ist seit 28. Okt. 2026 GA. Es ersetzt Auto und wählt pro Anfrage ein Modell oder einen Workflow aus mehreren Modellen, abhängig vom gewählten Effort-Level. <a href="'+U.fusionCl+'" target="_blank">Changelog</a> · <a href="'+U.fusion+'" target="_blank">Doku</a>'},
+ flowsH:{en:'Three orchestration workflows',de:'Drei Orchestrierungs-Workflows'},
+ fusionLineage:{en:'<b>Lineage.</b> HydraFusion started as a research preview that orchestrated several models. Its <a href="'+U.hydraCl+'" target="_blank">14 Oct update</a> added a Max option. With GA it merged with auto model selection into Copilot Fusion. Existing HydraFusion and HydraFusion Max selections move to the matching Fusion levels.',de:'<b>Herkunft.</b> HydraFusion war eine Research Preview zur Orchestrierung mehrerer Modelle. Das <a href="'+U.hydraCl+'" target="_blank">Update vom 14. Okt.</a> brachte die Option Max. Mit GA wurde es mit der automatischen Modellauswahl zu Copilot Fusion zusammengeführt. Bestehende HydraFusion- und HydraFusion-Max-Auswahlen wechseln auf die passenden Fusion-Level.'},
+ sAgK:{en:'Agents',de:'Agenten'},
+ sAgH:{en:'Which agent for which job',de:'Welcher Agent für welche Aufgabe'},
+ sAgP:{en:'Local and GitHub-hosted agents have different execution environments, permissions, and policies. Configure repository protections for changes submitted through pull requests. <a href="'+U.third+'" target="_blank" rel="noopener">Agent policy details</a>',de:'Lokale und auf GitHub ausgeführte Agenten haben unterschiedliche Umgebungen, Berechtigungen und Richtlinien. Repository-Schutzregeln gelten für Änderungen über Pull Requests. <a href="'+U.third+'" target="_blank" rel="noopener">Details zu Agent-Richtlinien</a>'},
+ agentHQ:{en:'<b>Agent HQ (public preview).</b> Anthropic Claude and OpenAI Codex can run as coding agents on GitHub through the Copilot subscription. Start a task from the Agents tab, an issue, a pull request, GitHub Mobile, or VS Code. GitHub-hosted access is enabled by policy; local VS Code agents have separate settings. <a href="'+U.third+'" target="_blank" rel="noopener">Docs</a> · <a href="'+U.hqBlog+'" target="_blank" rel="noopener">Blog</a>',de:'<b>Agent HQ (Public Preview).</b> Anthropic Claude und OpenAI Codex können über das Copilot-Abo als Coding-Agenten auf GitHub laufen. Start über Agents-Tab, Issue, Pull Request, GitHub Mobile oder VS Code. Zugriff auf GitHub-gehostete Agenten wird per Richtlinie aktiviert; lokale VS-Code-Agenten haben eigene Einstellungen. <a href="'+U.third+'" target="_blank" rel="noopener">Doku</a> · <a href="'+U.hqBlog+'" target="_blank" rel="noopener">Blog</a>'},
+ sNatK:{en:'Platform advantage',de:'Plattform-Vorteil'},
+ sNatH:{en:'Why Copilot is native to GitHub',de:'Warum Copilot nativ in GitHub ist'},
+ sNatP:{en:'Copilot connects work with the GitHub repositories, issues, pull requests, and checks your team already uses. Configure repository rules and human review for changes.',de:'Copilot verbindet Aufgaben mit den GitHub-Repositories, Issues, Pull Requests und Checks, die Ihr Team bereits nutzt. Repository-Regeln und menschliche Reviews lassen sich für Änderungen konfigurieren.'},
+ pipeH:{en:'From issue to merge without leaving GitHub',de:'Vom Issue bis zum Merge, ohne GitHub zu verlassen'},
+ sFeatK:{en:'Catalog',de:'Katalog'},
+ sFeatH:{en:'Feature catalog',de:'Funktionskatalog'},
+ sFeatP:{en:'Filter by audience and status, or search.',de:'Nach Zielgruppe und Status filtern oder suchen.'},
+ sGovK:{en:'Trust and control',de:'Vertrauen und Kontrolle'},
+ sGovH:{en:'Governance, security and measurement',de:'Governance, Sicherheit und Messung'},
+ sGovP:{en:'What platform, security and procurement teams usually ask first.',de:'Was Plattform-, Security- und Einkaufsteams meist zuerst fragen.'},
+ billing:{en:'<b>Billing model.</b> Usage is measured in AI credits (1 credit = USD 0.01), with token rates depending on the model. Chat, CLI, cloud agent, Spaces and third-party agents can consume credits; included allowances and budgets depend on the plan. Inline completions and next edit suggestions do not consume credits. <a href="'+U.billing+'" target="_blank" rel="noopener">Billing docs</a> · <a href="'+U.plans+'" target="_blank" rel="noopener">Plans</a>',de:'<b>Abrechnung.</b> Die Nutzung wird in AI Credits gemessen (1 Credit = 0,01 USD); der Tokenpreis hängt vom Modell ab. Chat, CLI, Cloud Agent, Spaces und Drittanbieter-Agenten können Credits verbrauchen; enthaltene Kontingente und Budgets hängen vom Plan ab. Inline-Vervollständigungen und Next Edit Suggestions verbrauchen keine Credits. <a href="'+U.billing+'" target="_blank" rel="noopener">Billing-Doku</a> · <a href="'+U.plans+'" target="_blank" rel="noopener">Pläne</a>'},
+ sRollK:{en:'Adoption',de:'Einführung'},
+ sRollH:{en:'A four-phase rollout',de:'Einführung in vier Phasen'},
+ sRollP:{en:'Suggested approach for a GitHub Enterprise Cloud customer. Adjust the timing to your size.',de:'Vorschlag für GitHub-Enterprise-Cloud-Kunden. Zeitplan an die eigene Größe anpassen.'},
+ e2eH:{en:'Target end state: one feature, end to end',de:'Zielbild: ein Feature, durchgängig'},
+ sFaqH:{en:'Questions decision makers ask',de:'Fragen von Entscheidern'},
+ sSrcK:{en:'Sources',de:'Quellen'},
+ sSrcH:{en:'Public documentation used',de:'Verwendete öffentliche Dokumentation'},
+ sSrcP:{en:'The overview is a 6 Nov 2026 snapshot; lifecycle references were reviewed on 12 Nov. Model lists and preview features change, so recheck before a purchase decision.',de:'Der Überblick hat den Stand vom 6. Nov. 2026; Lebenszyklus-Quellen wurden am 12. Nov. geprüft. Modelllisten und Preview-Funktionen ändern sich, vor einer Kaufentscheidung erneut prüfen.'},
+ footer:{en:'Prepared from public GitHub documentation and changelog entries. Not a contract or pricing document. For plan pricing and terms, contact your GitHub account team.',de:'Erstellt aus öffentlicher GitHub-Dokumentation und Changelog-Einträgen. Kein Vertrags- oder Preisdokument. Für Preise und Konditionen bitte an das GitHub-Account-Team wenden.'},
+ search:{en:'Search…',de:'Suchen…'},
+ searchModels:{en:'Search models',de:'Modelle suchen'},
+ searchFeatures:{en:'Search features',de:'Funktionen suchen'},
+ roleFilter:{en:'Audience',de:'Zielgruppe'},
+ statusFilter:{en:'Status',de:'Status'},
+ stagesLabel:{en:'Software lifecycle stages',de:'Phasen des Software-Lebenszyklus'},
+ noResults:{en:'No results. Try another search or filter.',de:'Keine Ergebnisse. Versuchen Sie eine andere Suche oder einen anderen Filter.'},
+ flowRequest:{en:'Request',de:'Anfrage'},
+ flowModel:{en:'Model',de:'Modell'},
+ flowEfficient:{en:'Efficient',de:'Effizient'},
+ flowJudge:{en:'Judge',de:'Prüfung'},
+ flowAccept:{en:'accept',de:'annehmen'},
+ flowStronger:{en:'Stronger',de:'Stärker'},
+ flowDrafter:{en:'Drafter',de:'Entwurf'},
+ flowCritics:{en:'Critics',de:'Kritik'},
+ flowRevised:{en:'Revised',de:'Überarbeitet'},
+ all:{en:'All',de:'Alle'},
+ shown:{en:'shown',de:'angezeigt'}
+};
+const NAV=[['surfaces',{en:'Surfaces',de:'Oberflächen'}],['sdlc',{en:'SDLC',de:'SDLC'}],['models',{en:'Models',de:'Modelle'}],['fusion',{en:'Fusion',de:'Fusion'}],['agents',{en:'Agents',de:'Agenten'}],['native',{en:'Why GitHub',de:'Warum GitHub'}],['features',{en:'Features',de:'Funktionen'}],['governance',{en:'Governance',de:'Governance'}],['rollout',{en:'Rollout',de:'Einführung'}],['faq',{en:'FAQ',de:'FAQ'}],['sources',{en:'Sources',de:'Quellen'}]];
+const STATS=[
+ ['5',{en:'surfaces, from IDE to GitHub Mobile',de:'Oberflächen, von der IDE bis GitHub Mobile'},'#surfaces'],
+ ['6',{en:'model providers in the current catalog',de:'Modellanbieter im aktuellen Katalog'},'#models'],
+ ['3',{en:'selectable Fusion effort levels',de:'wählbare Fusion-Effort-Level'},'#fusion'],
+ ['→',{en:'from an issue to a pull request',de:'vom Issue zum Pull Request'},'#native']];
+const TLDR=[
+ {n:'01',role:{en:'Leadership',de:'Management'},h:{en:'See the bigger picture',de:'Das Gesamtbild verstehen'},d:{en:'See how Copilot fits the GitHub workflow and how teams can measure adoption.',de:'Sehen Sie, wie Copilot in GitHub-Abläufe passt und wie Teams die Nutzung messen.'},a:{en:'Explore the GitHub workflow',de:'GitHub-Ablauf ansehen'},href:'#native'},
+ {n:'02',role:{en:'Developers',de:'Entwicklung'},h:{en:'Explore your workflow',de:'Den eigenen Workflow entdecken'},d:{en:'Follow practical examples from suggestions in the IDE to agents and code review.',de:'Entdecken Sie Beispiele von Vorschlägen in der IDE bis zu Agenten und Code Review.'},a:{en:'Explore the lifecycle',de:'Lebenszyklus entdecken'},href:'#sdlc'},
+ {n:'03',role:{en:'Platform and security',de:'Plattform und Security'},h:{en:'Set the guardrails',de:'Leitplanken festlegen'},d:{en:'Review model controls, agent permissions, audit logs, and cost management.',de:'Prüfen Sie Modellsteuerung, Agent-Berechtigungen, Audit-Logs und Kostenkontrolle.'},a:{en:'Explore governance',de:'Governance ansehen'},href:'#governance'}];
+const SURF=[
+ {i:'⌨',h:{en:'IDE',de:'IDE'},d:{en:'VS Code, Visual Studio, JetBrains, Xcode, Eclipse and others. Completions, next edit suggestions, chat, agent mode.',de:'VS Code, Visual Studio, JetBrains, Xcode, Eclipse u. a. Vervollständigung, Next Edit Suggestions, Chat, Agent Mode.'},u:U.ide},
+ {i:'>_',h:{en:'Copilot CLI',de:'Copilot CLI'},d:{en:'Agent in the terminal. Plans, edits files, runs commands and tests, works with git and gh. Good for scripting and ops.',de:'Agent im Terminal. Plant, ändert Dateien, führt Befehle und Tests aus, arbeitet mit git und gh. Gut für Skripte und Betrieb.'},u:U.cli},
+ {i:'▣',h:{en:'Copilot app',de:'Copilot App'},d:{en:'Desktop app on macOS, Windows and Linux. Parallel sessions can use worktrees, branches, and local or cloud environments.',de:'Desktop-App für macOS, Windows und Linux. Parallele Sessions können Worktrees, Branches sowie lokale oder Cloud-Umgebungen nutzen.'},u:U.app},
+ {i:'◎',h:{en:'GitHub.com',de:'GitHub.com'},d:{en:'Cloud agent on issues, code review on pull requests, Spaces, chat, third-party agents in Agent HQ.',de:'Cloud Agent auf Issues, Code Review in Pull Requests, Spaces, Chat, Drittanbieter-Agenten in Agent HQ.'},u:U.cloud},
+ {i:'▯',h:{en:'GitHub Mobile',de:'GitHub Mobile'},d:{en:'Chat, assign issues to agents, follow agent sessions and review pull requests on the go.',de:'Chat, Issues an Agenten zuweisen, Agent-Sessions verfolgen und Pull Requests unterwegs prüfen.'},u:U.matrix}];
+const LADDER=[
+ [{en:'Completions and NES',de:'Vervollständigung und NES'},{en:'Ghost text and next edit suggestions as you type',de:'Ghost Text und nächste Änderung beim Tippen'},18],
+ [{en:'Chat',de:'Chat'},{en:'Ask, explain, generate in context',de:'Fragen, erklären, generieren im Kontext'},30],
+ [{en:'Agent mode in IDE',de:'Agent Mode in der IDE'},{en:'Multi-file edits, runs tests, iterates',de:'Mehrdatei-Änderungen, Tests, Iteration'},44],
+ [{en:'CLI and app agents',de:'CLI- und App-Agenten'},{en:'Parallel local sessions, plan and autopilot',de:'Parallele lokale Sessions, Plan und Autopilot'},58],
+ [{en:'Cloud and third-party agents',de:'Cloud- und Drittanbieter-Agenten'},{en:'Issue in, draft pull request out',de:'Issue rein, Draft-PR raus'},72],
+ [{en:'Automations and workflows',de:'Automatisierungen und Workflows'},{en:'Scheduled, event-driven or multi-agent work',de:'Geplante, ereignisgesteuerte oder Multi-Agent-Arbeit'},86]];
+const MCOLS=['IDE','CLI','App','GitHub.com','Mobile'];
+const MROWS=[
+ [{en:'Inline completions, NES',de:'Inline-Vervollständigung, NES'},'pnnnn'],
+ [{en:'Chat',de:'Chat'},'pyyyy'],
+ [{en:'Agent working on local code',de:'Agent auf lokalem Code'},'pyynn'],
+ [{en:'Parallel sessions with worktrees',de:'Parallele Sessions mit Worktrees'},'pyynn'],
+ [{en:'Cloud agent (issue to PR)',de:'Cloud Agent (Issue zu PR)'},'pyyyy'],
+ [{en:'Third-party agents (Claude, Codex)',de:'Drittanbieter-Agenten (Claude, Codex)'},'pnnpp'],
+ [{en:'Code review on pull requests',de:'Code Review in Pull Requests'},'pnnyy'],
+ [{en:'Model picker',de:'Modellauswahl'},'pyyyp'],
+ [{en:'Copilot Fusion',de:'Copilot Fusion'},'pyynn'],
+ [{en:'MCP servers',de:'MCP-Server'},'pyyyn'],
+ [{en:'Custom instructions and agents',de:'Custom Instructions und Agenten'},'pyyyn']];
+const STAGES=[
+ {k:{en:'Plan',de:'Planen'},what:{en:'Turn ideas into scoped issues, break down epics, draft acceptance criteria, ground answers in Spaces that hold your docs and code.',de:'Ideen in Issues fassen, Epics zerlegen, Akzeptanzkriterien entwerfen, Antworten über Spaces mit Doku und Code fundieren.'},where:{en:'GitHub.com chat, Spaces, Copilot app plan mode',de:'GitHub.com Chat, Spaces, Plan-Modus der Copilot App'},prompt:{en:'Break the SSO migration epic into issues of one to two days each, with acceptance criteria and dependencies.',de:'Zerlege das SSO-Migrations-Epic in Issues von ein bis zwei Tagen, mit Akzeptanzkriterien und Abhängigkeiten.'},human:{en:'Product owner approves scope and priority.',de:'Product Owner bestätigt Umfang und Priorität.'},u:U.spaces},
+ {k:{en:'Code',de:'Entwickeln'},what:{en:'Completions and next edit suggestions while typing, agent mode for multi-file changes, parallel sessions in the CLI or Copilot app.',de:'Vervollständigung und Next Edit Suggestions beim Tippen, Agent Mode für Mehrdatei-Änderungen, parallele Sessions in CLI oder Copilot App.'},where:{en:'IDE, Copilot CLI, Copilot app',de:'IDE, Copilot CLI, Copilot App'},prompt:{en:'Add rate limiting to the /orders API using our existing middleware pattern. Update tests.',de:'Füge der /orders-API Rate Limiting mit unserem bestehenden Middleware-Muster hinzu. Tests anpassen.'},human:{en:'Developer reviews the diff before commit.',de:'Entwickler prüft den Diff vor dem Commit.'},u:U.agentMode},
+ {k:{en:'Test',de:'Testen'},what:{en:'Generate unit and integration tests, run them, read failures and fix. Computer use can drive a real UI for checks (preview).',de:'Unit- und Integrationstests erzeugen, ausführen, Fehler lesen und beheben. Computer Use kann eine echte UI bedienen (Preview).'},where:{en:'IDE agent mode, CLI, cloud agent',de:'IDE Agent Mode, CLI, Cloud Agent'},prompt:{en:'Raise coverage of billing/ to 85 percent. Cover the currency rounding edge cases.',de:'Erhöhe die Testabdeckung von billing/ auf 85 Prozent. Rundungsfälle bei Währungen abdecken.'},human:{en:'Team decides which tests are meaningful.',de:'Team entscheidet, welche Tests sinnvoll sind.'},u:U.cu},
+ {k:{en:'Review',de:'Review'},what:{en:'Copilot code review comments on pull requests with suggested fixes. Agents respond to review comments and push follow-up commits.',de:'Copilot Code Review kommentiert Pull Requests mit Fix-Vorschlägen. Agenten reagieren auf Review-Kommentare und pushen Folge-Commits.'},where:{en:'GitHub.com pull requests, IDE',de:'Pull Requests auf GitHub.com, IDE'},prompt:{en:'@copilot address the review comments and keep the public API unchanged.',de:'@copilot setze die Review-Kommentare um, die öffentliche API bleibt unverändert.'},human:{en:'Required human approval stays in branch protection.',de:'Pflicht-Freigabe durch Menschen bleibt im Branch-Schutz.'},u:U.review},
+ {k:{en:'Secure',de:'Absichern'},what:{en:'Use Copilot to investigate and remediate findings. Related GitHub security products add AI Scan, CodeQL, secret detection and autofix, subject to their own requirements.',de:'Copilot hilft beim Untersuchen und Beheben von Befunden. Zugehörige GitHub-Sicherheitsprodukte ergänzen AI Scan, CodeQL, Secret-Erkennung und Autofix mit jeweils eigenen Voraussetzungen.'},where:{en:'GitHub security and quality, pull requests, Copilot app',de:'GitHub Security and Quality, Pull Requests, Copilot App'},prompt:{en:'Fix the SQL injection alert in reports/query.ts and add a regression test.',de:'Behebe den SQL-Injection-Alert in reports/query.ts und ergänze einen Regressionstest.'},human:{en:'Security team reviews findings and owns policies and exceptions.',de:'Das Security-Team prüft Befunde und verantwortet Richtlinien und Ausnahmen.'},u:U.aiScan},
+ {k:{en:'Operate',de:'Betreiben'},what:{en:'Diagnose Actions failures, draft runbooks and scripts, automate recurring work, and monitor adoption, policy and cost.',de:'Actions-Fehler untersuchen, Runbooks und Skripte entwerfen, wiederkehrende Aufgaben automatisieren sowie Nutzung, Richtlinien und Kosten beobachten.'},where:{en:'Copilot CLI, GitHub Actions, Copilot app',de:'Copilot CLI, GitHub Actions, Copilot App'},prompt:{en:'Why did the deploy workflow fail on main? Propose a fix as a pull request.',de:'Warum ist der Deploy-Workflow auf main fehlgeschlagen? Fix als Pull Request vorschlagen.'},human:{en:'On-call engineer approves production changes.',de:'Bereitschaft gibt Produktionsänderungen frei.'},u:U.cli}];
+const SL={what:{en:'What Copilot does',de:'Was Copilot tut'},where:{en:'Where',de:'Wo'},prompt:{en:'Sample prompt',de:'Beispiel-Prompt'},human:{en:'Human checkpoint',de:'Menschlicher Kontrollpunkt'},doc:{en:'Documentation',de:'Dokumentation'}};
+const PROV={OpenAI:'#3fb950',Anthropic:'#db61a2',Google:'#2f81f7',Microsoft:'#39c5cf','Moonshot AI':'#d29922',xAI:'#c297ff'};
+const MOD=[
+ ['GPT-5.3-Codex','OpenAI','ga',{en:'Long-term support model and fallback',de:'Long-Term-Support-Modell und Fallback'}],
+ ['GPT-5.4 nano','OpenAI','ga',''],['GPT-5.6 Luna','OpenAI','ga',''],['GPT-5.6 Sol','OpenAI','ga',''],['GPT-5.6 Terra','OpenAI','ga',''],
+ ['GPT-6 Astra','OpenAI','ga',''],['GPT-6 Luna','OpenAI','ga',''],['GPT-6 Sol','OpenAI','ga',''],['GPT-6.1 Sol','OpenAI','ga',''],['GPT-6.1 Terra','OpenAI','ga',''],
+ ['Claude Fable 5','Anthropic','ga',{en:'Prompts and outputs are retained by default. Eligible enterprises can request a temporary zero-data-retention exemption through 2026, subject to approval and usage restrictions.',de:'Prompts und Ausgaben werden standardmäßig gespeichert. Berechtigte Enterprises können bis Ende 2026 eine zeitlich begrenzte Zero-Data-Retention-Ausnahme beantragen. Genehmigung und Nutzungsbeschränkungen gelten.'}],
+ ['Claude Fable 5.1','Anthropic','ga',{en:'Same retention and exemption conditions as Fable 5. See supported-model documentation.',de:'Gleiche Speicher- und Ausnahmebedingungen wie bei Fable 5. Siehe Supported-Models-Dokumentation.'}],
+ ['Claude Haiku 4.5','Anthropic','ga',''],['Claude Haiku 5.5','Anthropic','ga',''],['Claude Opus 4.8','Anthropic','ga',''],
+ ['Claude Opus 4.8 fast mode','Anthropic','pv',{en:'Preview',de:'Preview'}],
+ ['Claude Opus 5','Anthropic','ga',''],['Claude Opus 5.5','Anthropic','ga',''],['Claude Sonnet 4.6','Anthropic','ga',''],['Claude Sonnet 5','Anthropic','ga',''],['Claude Sonnet 5.5','Anthropic','ga',''],
+ ['Gemini 3.8 Flash','Google','ga',''],['Gemini 4 Argon','Google','ga',''],
+ ['MAI-Code-1.1-Flash','Microsoft','ga',''],
+ ['Kimi K3','Moonshot AI','ga',''],
+ ['Grok 4.5','xAI','ga',''],['Grok 4.6','xAI','ga',''],['Grok 4.7','xAI','ga','']];
+const MH={m:{en:'Model',de:'Modell'},p:{en:'Provider',de:'Anbieter'},s:{en:'Status',de:'Status'},n:{en:'Note',de:'Hinweis'}};
+const MNOTES=[
+ {h:{en:'Admins decide',de:'Admins entscheiden'},d:{en:'Available models depend on plan, client, and admin settings. Some third-party extensions have separate controls.',de:'Verfügbare Modelle hängen von Plan, Client und Admin-Einstellungen ab. Einige Drittanbieter-Erweiterungen haben eigene Kontrollen.'},u:U.policies},
+ {h:{en:'Pick per task',de:'Pro Aufgabe wählen'},d:{en:'Use the model comparison guide: lightweight models for quick edits, reasoning models for design and debugging.',de:'Model-Comparison-Leitfaden nutzen: leichte Modelle für schnelle Änderungen, Reasoning-Modelle für Design und Debugging.'},u:U.compare},
+ {h:{en:'Or let Fusion pick',de:'Oder Fusion wählen lassen'},d:{en:'Fusion routes each request to an allowed model or combines several, so users do not need to track model releases.',de:'Fusion leitet jede Anfrage an ein erlaubtes Modell oder kombiniert mehrere, Nutzer müssen Modell-Releases nicht verfolgen.'},u:U.fusion}];
+const LEVELS=[
+ ['Standard',34,{en:'Versatile models for everyday coding: edits, explanations, routine features.',de:'Vielseitige Modelle für den Alltag: Änderungen, Erklärungen, Routine-Features.'}],
+ ['High',67,{en:'Challenging tasks: cross-module refactors, tricky bugs, design decisions.',de:'Anspruchsvolle Aufgaben: modulübergreifende Refactorings, schwierige Bugs, Designentscheidungen.'}],
+ ['Max',100,{en:'Most demanding work: large migrations, hard reasoning, high-stakes changes.',de:'Höchste Anforderungen: große Migrationen, schweres Reasoning, kritische Änderungen.'}]];
+const FLOWS=[
+ ['Single',{en:'One model completes the task.',de:'Ein Modell bearbeitet die Aufgabe.'},
+  '<rect class="nodeA" x="20" y="55" width="90" height="40" rx="8"/><text x="65" y="75" data-i="flowRequest"></text><path class="edge" d="M110 75 H170"/><rect class="nodeB" x="170" y="55" width="90" height="40" rx="8"/><text x="215" y="75" data-i="flowModel"></text><path class="edge" d="M260 75 H300"/><circle class="nodeC" cx="315" cy="75" r="14"/><text x="315" y="75">✓</text>'],
+ ['Cascade',{en:'An efficient model drafts. A judge accepts it or escalates to a stronger model.',de:'Ein effizientes Modell entwirft. Ein Judge akzeptiert oder eskaliert an ein stärkeres Modell.'},
+  '<rect class="nodeB" x="10" y="55" width="76" height="40" rx="8"/><text x="48" y="75" data-i="flowEfficient"></text><path class="edge" d="M86 75 H120"/><rect class="node" x="120" y="55" width="66" height="40" rx="8"/><text x="153" y="75" data-i="flowJudge"></text><path class="edge" d="M186 70 L230 30"/><path class="edge" d="M186 80 L230 120"/><circle class="nodeC" cx="250" cy="28" r="14"/><text x="250" y="28">✓</text><text x="300" y="28" style="font-size:11px" data-i="flowAccept"></text><rect class="nodeA" x="230" y="102" width="86" height="36" rx="8"/><text x="273" y="120" data-i="flowStronger"></text>'],
+ ['Critique',{en:'Several models critique a draft. The original model revises it.',de:'Mehrere Modelle prüfen einen Entwurf. Das ursprüngliche Modell überarbeitet ihn.'},
+  '<rect class="nodeA" x="20" y="20" width="90" height="40" rx="8"/><text x="65" y="40" data-i="flowDrafter"></text><rect class="nodeB" x="220" y="20" width="90" height="40" rx="8"/><text x="265" y="40" data-i="flowCritics"></text><path class="edge" d="M110 34 H220"/><path class="edge" d="M220 48 H110"/><path class="edge" d="M65 60 V105 H140"/><rect class="nodeC" x="140" y="88" width="96" height="36" rx="8"/><text x="188" y="106" data-i="flowRevised"></text>']];
+const FFACTS=[
+ {h:{en:'Policy-aware',de:'Richtlinienkonform'},d:{en:'Fusion only uses models your policies allow. Admins can exclude models from Fusion and make Fusion the default with enterprise managed settings.',de:'Fusion nutzt nur per Richtlinie erlaubte Modelle. Admins können Modelle ausschließen und Fusion per Managed Settings als Standard setzen.'},u:U.fusionAdmin},
+ {h:{en:'Billing',de:'Abrechnung'},d:{en:'Billed per model used at standard rates. Paid plans get a 30 percent discount for a limited time.',de:'Abrechnung pro genutztem Modell zu Standardpreisen. Bezahlte Pläne erhalten zeitlich begrenzt 30 Prozent Rabatt.'},u:U.fusionCl},
+ {h:{en:'Where',de:'Wo'},d:{en:'All plans, in VS Code, the Copilot app, Copilot CLI and JetBrains. Local model routing is an experimental preview.',de:'Alle Pläne, in VS Code, Copilot App, Copilot CLI und JetBrains. Lokales Model Routing ist eine experimentelle Preview.'},u:U.fusion}];
+const AGH={a:{en:'Agent',de:'Agent'},r:{en:'Runs where',de:'Läuft wo'},t:{en:'Trigger',de:'Auslöser'},o:{en:'Output',de:'Ergebnis'},b:{en:'Best for',de:'Ideal für'}};
+const AG=[
+ [{en:'IDE agent mode',de:'IDE Agent Mode'},'ga',{en:'Developer machine',de:'Entwickler-Rechner'},{en:'Prompt in chat',de:'Prompt im Chat'},{en:'Local edits, terminal commands',de:'Lokale Änderungen, Terminal-Befehle'},{en:'Interactive multi-file work',de:'Interaktive Mehrdatei-Arbeit'},U.agentMode],
+ [{en:'Copilot CLI',de:'Copilot CLI'},'ga',{en:'Terminal, local',de:'Terminal, lokal'},{en:'Prompt, script, plan or autopilot',de:'Prompt, Skript, Plan oder Autopilot'},{en:'Edits, commands, commits, PRs',de:'Änderungen, Befehle, Commits, PRs'},{en:'Ops, scripting, repo-wide tasks',de:'Betrieb, Skripte, repo-weite Aufgaben'},U.cli],
+ [{en:'Copilot app sessions',de:'Copilot App Sessions'},'ga',{en:'Desktop, local or cloud sandbox',de:'Desktop, lokale oder Cloud-Sandbox'},{en:'New session per task',de:'Neue Session pro Aufgabe'},{en:'Branch per session, PR',de:'Branch pro Session, PR'},{en:'Several tasks in parallel',de:'Mehrere Aufgaben parallel'},U.app],
+ [{en:'Copilot cloud agent',de:'Copilot Cloud Agent'},'ga',{en:'GitHub Actions environment',de:'GitHub-Actions-Umgebung'},{en:'Assign issue, Agents tab, @copilot',de:'Issue zuweisen, Agents-Tab, @copilot'},{en:'Draft pull request',de:'Draft Pull Request'},{en:'Well-scoped backlog items',de:'Klar umrissene Backlog-Items'},U.cloud],
+ [{en:'Claude and Codex (Agent HQ)',de:'Claude und Codex (Agent HQ)'},'pv',{en:'GitHub-hosted coding agent',de:'GitHub-gehosteter Coding-Agent'},{en:'Agents tab, issue, @mention, Mobile, VS Code',de:'Agents-Tab, Issue, @Erwähnung, Mobile, VS Code'},{en:'Pull request or other artifact',de:'Pull Request oder anderes Artefakt'},{en:'Comparing approaches on one task',de:'Vergleich von Ansätzen für eine Aufgabe'},U.third],
+ [{en:'Copilot code review',de:'Copilot Code Review'},'ga',{en:'GitHub pull requests',de:'Pull Requests auf GitHub'},{en:'Request review or auto-review rule',de:'Review anfordern oder Auto-Review-Regel'},{en:'Review comments, suggested fixes',de:'Review-Kommentare, Fix-Vorschläge'},{en:'First-pass review at scale',de:'Erstreview in der Breite'},U.review],
+ [{en:'Dynamic workflows',de:'Dynamic Workflows'},'pv',{en:'Orchestrated sub-agents',de:'Orchestrierte Sub-Agenten'},{en:'Workflow definition',de:'Workflow-Definition'},{en:'Coordinated multi-agent result',de:'Koordiniertes Multi-Agent-Ergebnis'},{en:'Large tasks split into parallel parts',de:'Große Aufgaben, parallel aufgeteilt'},U.dyn],
+ [{en:'Copilot automations',de:'Copilot Automations'},'vr',{en:'GitHub cloud, Copilot app or VS Code',de:'GitHub Cloud, Copilot App oder VS Code'},{en:'Schedule, repository event or API',de:'Zeitplan, Repository-Ereignis oder API'},{en:'Recurring agent runs',de:'Wiederkehrende Agent-Läufe'},{en:'Reports, triage and investigations',de:'Reports, Triage und Untersuchungen'},U.automations]];
+const PIPE=[
+ [{en:'Issue',de:'Issue'},{en:'Scoped in Issues or Projects',de:'Erfasst in Issues oder Projects'}],
+ [{en:'Assign agent',de:'Agent zuweisen'},{en:'Copilot, Claude or Codex',de:'Copilot, Claude oder Codex'}],
+ [{en:'Branch and draft PR',de:'Branch und Draft-PR'},{en:'Work is visible in the PR timeline',de:'Arbeit sichtbar in der PR-Timeline'}],
+ [{en:'Actions checks',de:'Actions-Checks'},{en:'Run configured CI and checks',de:'Konfigurierte CI und Checks ausführen'}],
+ [{en:'Code review',de:'Code Review'},{en:'Copilot feedback and team review',de:'Copilot-Feedback und Team-Review'}],
+ [{en:'Code scanning',de:'Code Scanning'},{en:'Alerts and Autofix in the PR',de:'Alerts und Autofix im PR'}],
+ [{en:'Merge',de:'Merge'},{en:'Branch protection and rulesets apply',de:'Branch-Schutz und Rulesets greifen'}],
+ [{en:'Metrics and audit',de:'Metriken und Audit'},{en:'Usage and agent actions are logged',de:'Nutzung und Agent-Aktionen protokolliert'}]];
+const NATIVE=[
+ {i:'◈',h:{en:'Work in GitHub context',de:'Arbeit im GitHub-Kontext'},d:{en:'Start cloud sessions from repositories, issues, and pull requests. Attach relevant files or Spaces when needed.',de:'Cloud-Sessions aus Repositories, Issues und Pull Requests starten. Bei Bedarf passende Dateien oder Spaces anhängen.'},u:U.cloud},
+ {i:'⛨',h:{en:'Existing guardrails apply',de:'Bestehende Leitplanken greifen'},d:{en:'Agent work lands on a branch as a pull request. Rulesets, required reviews and status checks are enforced as for any contributor.',de:'Agent-Arbeit landet als Pull Request auf einem Branch. Rulesets, Pflicht-Reviews und Status-Checks gelten wie für jede Person.'},u:U.resp},
+ {i:'⚙',h:{en:'Runs on Actions',de:'Läuft auf Actions'},d:{en:'The cloud agent uses a GitHub Actions environment you can configure with your tools, runners and firewall rules.',de:'Der Cloud Agent nutzt eine GitHub-Actions-Umgebung, konfigurierbar mit eigenen Tools, Runnern und Firewall-Regeln.'},u:U.cloud},
+ {i:'⚑',h:{en:'Security in the loop',de:'Security im Ablauf'},d:{en:'When enabled for an eligible repository, code scanning, secret scanning and Code Quality findings can appear in the pull request. Their product requirements differ.',de:'Wenn sie für ein geeignetes Repository aktiviert sind, können Befunde aus Code Scanning, Secret Scanning und Code Quality im Pull Request erscheinen. Die Produktvoraussetzungen unterscheiden sich.'},u:U.quality},
+ {i:'☰',h:{en:'Audit GitHub activity',de:'GitHub-Aktivität prüfen'},d:{en:'Review supported Copilot policy and GitHub-hosted agent events in your audit logs.',de:'Unterstützte Copilot-Richtlinienereignisse und Aktivitäten GitHub-gehosteter Agenten in Audit-Logs prüfen.'},u:U.audit},
+ {i:'▤',h:{en:'Measured centrally',de:'Zentral gemessen'},d:{en:'The Copilot metrics dashboard and API report adoption, acceptance and agent usage per organization and team.',de:'Copilot-Metrics-Dashboard und API zeigen Adoption, Akzeptanz und Agent-Nutzung je Organisation und Team.'},u:U.metrics},
+ {i:'⇄',h:{en:'Agent choice on GitHub',de:'Agentenwahl auf GitHub'},d:{en:'Use Copilot, Claude, and Codex through GitHub entry points. Partner agents are in public preview and require policy enablement.',de:'Copilot, Claude und Codex über GitHub-Einstiegspunkte nutzen. Partner-Agenten sind in Public Preview und müssen per Richtlinie aktiviert werden.'},u:U.third},
+ {i:'✎',h:{en:'Tailor the context',de:'Kontext anpassen'},d:{en:'Use repository instructions, custom agents, and MCP where supported. Configuration and support vary by surface.',de:'Repository-Instructions, Custom Agents und MCP dort nutzen, wo sie unterstützt werden. Konfiguration und Unterstützung variieren je Oberfläche.'},u:U.cheat}];
+const ROLES={dev:{en:'Developer',de:'Entwicklung'},plat:{en:'Platform and security',de:'Plattform und Security'},lead:{en:'Leadership',de:'Management'}};
+const STAT={ga:{en:'GA',de:'GA'},pv:{en:'Preview',de:'Preview'},vr:{en:'Check availability',de:'Verfügbarkeit prüfen'}};
+const PRODUCT={
+ copilot:{en:'GitHub Copilot',de:'GitHub Copilot'},
+ code:{en:'GitHub Code Security / GHAS',de:'GitHub Code Security / GHAS'},
+ advanced:{en:'GitHub Advanced Security',de:'GitHub Advanced Security'},
+ secret:{en:'GitHub Secret Protection / GHAS',de:'GitHub Secret Protection / GHAS'},
+ quality:{en:'GitHub Code Quality',de:'GitHub Code Quality'},
+ actions:{en:'GitHub Actions + an agent',de:'GitHub Actions + Agent'},
+ microsoft:{en:'Microsoft IDE tooling + Copilot',de:'Microsoft IDE-Tools + Copilot'}
+};
+const feature=(id,name,status,role,description,url,product='copilot')=>({id,name,status,role,description,url,product});
+const FEAT=[
+ feature('completions',{en:'Inline completions',de:'Inline-Vervollständigung'},'ga','dev',{en:'Suggest code as ghost text in the editor. Inline completions do not consume AI credits.',de:'Schlägt Code als Ghost Text im Editor vor. Inline-Vervollständigungen verbrauchen keine AI Credits.'},U.sugg),
+ feature('nes',{en:'Next edit suggestions',de:'Next Edit Suggestions'},'vr','dev',{en:'Suggest the next location and change while editing. Support varies by IDE.',de:'Schlägt beim Bearbeiten Ort und Inhalt der nächsten Änderung vor. Die Unterstützung variiert je IDE.'},U.matrix),
+ feature('chat',{en:'Copilot Chat',de:'Copilot Chat'},'ga','dev',{en:'Ask questions, explain code, draft text and generate or refine changes in supported surfaces.',de:'Beantwortet Fragen, erklärt Code, entwirft Texte und erstellt oder überarbeitet Änderungen auf unterstützten Oberflächen.'},U.ide),
+ feature('inline-edit',{en:'Inline chat and edit mode',de:'Inline Chat und Edit Mode'},'vr','dev',{en:'Ask for focused changes in the editor or coordinate edits across selected files where supported.',de:'Ermöglicht gezielte Änderungen im Editor oder Änderungen an ausgewählten Dateien, sofern unterstützt.'},U.matrix),
+ feature('agent-mode',{en:'IDE agent mode',de:'IDE Agent Mode'},'ga','dev',{en:'Investigates a task, edits multiple files and can run commands and tests with the configured permissions.',de:'Untersucht eine Aufgabe, ändert mehrere Dateien und kann mit den konfigurierten Rechten Befehle und Tests ausführen.'},U.agentMode),
+ feature('cli',{en:'Copilot CLI',de:'Copilot CLI'},'ga','dev',{en:'A terminal agent for planning, code changes, commands and GitHub workflows. Review requested tool permissions.',de:'Terminal-Agent für Planung, Codeänderungen, Befehle und GitHub-Workflows. Angeforderte Tool-Berechtigungen prüfen.'},U.cli),
+ feature('app',{en:'GitHub Copilot app',de:'GitHub Copilot App'},'ga','dev',{en:'Manage local and cloud agent sessions in a desktop app, including parallel work in isolated worktrees.',de:'Verwaltet lokale und Cloud-Agent-Sessions in einer Desktop-App, auch parallele Arbeit in isolierten Worktrees.'},U.app),
+ feature('projects',{en:'Copilot app Projects',de:'Projects in der Copilot App'},'pv','lead',{en:'Coordinate longer work across repositories and supporting context with agents and project automations.',de:'Koordiniert längere Aufgaben über Repositories und weiteren Kontext hinweg mit Agenten und Projekt-Automatisierungen.'},U.projects),
+ feature('cloud',{en:'Copilot cloud agent',de:'Copilot Cloud Agent'},'ga','dev',{en:'Delegate scoped development work or an issue to a GitHub-hosted agent. Coding tasks can produce a draft pull request for review.',de:'Übergibt abgegrenzte Entwicklungsaufgaben oder ein Issue an einen GitHub-gehosteten Agenten. Coding-Aufgaben können einen Draft-PR zur Prüfung erzeugen.'},U.cloud),
+ feature('integrations',{en:'Cloud agent integrations',de:'Cloud-Agent-Integrationen'},'vr','dev',{en:'Start or collaborate on cloud agent work from supported tools including Teams, Slack, Jira, Linear and Azure Boards. Thread or issue context is captured in agent artifacts.',de:'Startet oder begleitet Cloud-Agent-Aufgaben aus unterstützten Tools wie Teams, Slack, Jira, Linear und Azure Boards. Der Kontext des Threads oder Issues wird in Agent-Artefakten erfasst.'},U.integrations),
+ feature('partners',{en:'Third-party coding agents',de:'Drittanbieter-Coding-Agenten'},'pv','dev',{en:'Use supported Claude or Codex agents on GitHub through Agent HQ, subject to policy and plan.',de:'Unterstützte Claude- oder Codex-Agenten über Agent HQ auf GitHub nutzen, abhängig von Richtlinie und Plan.'},U.third),
+ feature('planning',{en:'Planning and plan mode',de:'Planung und Plan Mode'},'vr','dev',{en:'Explore a task and produce a reviewable implementation plan before making changes where the client supports it.',de:'Untersucht eine Aufgabe und erstellt einen prüfbaren Umsetzungsplan vor Änderungen, sofern der Client dies unterstützt.'},U.cli),
+ feature('issues',{en:'Create and update issues',de:'Issues erstellen und aktualisieren'},'pv','dev',{en:'Draft or update an issue from a prompt or image, including fields and templates. Review before submitting.',de:'Entwirft oder aktualisiert ein Issue aus einem Prompt oder Bild, einschließlich Feldern und Vorlagen. Vor dem Absenden prüfen.'},U.issueDraft),
+ feature('spaces',{en:'Copilot Spaces',de:'Copilot Spaces'},'ga','dev',{en:'Curate shared context from selected code, documentation and notes so answers can use that material.',de:'Bündelt ausgewählten Code, Dokumentation und Notizen als gemeinsamen Kontext für Antworten.'},U.spaces),
+ feature('index',{en:'Workspace and repository context',de:'Workspace- und Repository-Kontext'},'vr','dev',{en:'Use available workspace indexing or code search to find relevant project context. Coverage varies by client.',de:'Nutzt verfügbare Workspace-Indizierung oder Code-Suche, um relevanten Projektkontext zu finden. Der Umfang variiert je Client.'},U.matrix),
+ feature('vision',{en:'Image and vision input',de:'Bild- und Vision-Eingaben'},'vr','dev',{en:'Use supported image inputs, such as a UI mock-up or screenshot, as context. Availability varies by client and model.',de:'Nutzt unterstützte Bilder wie UI-Entwürfe oder Screenshots als Kontext. Verfügbarkeit hängt von Client und Modell ab.'},U.matrix),
+ feature('memory',{en:'Copilot Memory',de:'Copilot Memory'},'vr','plat',{en:'Stores applicable repository facts and personal preferences for supported surfaces, subject to access and policy.',de:'Speichert anwendbare Repository-Fakten und persönliche Präferenzen für unterstützte Oberflächen, abhängig von Zugriff und Richtlinie.'},U.memory),
+ feature('fusion',{en:'Copilot Fusion',de:'Copilot Fusion'},'ga','dev',{en:'Routes a request to an allowed model or combines models according to the chosen effort level.',de:'Leitet Anfragen abhängig vom gewählten Effort-Level an ein erlaubtes Modell oder kombiniert mehrere Modelle.'},U.fusion),
+ feature('models',{en:'Model selection',de:'Modellauswahl'},'vr','dev',{en:'Choose a supported, policy-enabled model for the task; available models vary by plan and surface.',de:'Wählt ein unterstütztes, per Richtlinie freigegebenes Modell; die Auswahl hängt von Plan und Oberfläche ab.'},U.models),
+ feature('byok',{en:'Bring your own key or model',de:'Eigene Schlüssel oder Modelle'},'vr','plat',{en:'Some clients support connecting an external model provider with your own configuration. Provider terms and data handling apply.',de:'Einige Clients unterstützen die Verbindung eines externen Modellanbieters mit eigener Konfiguration. Bedingungen und Datenverarbeitung des Anbieters gelten.'},U.byok),
+ feature('mcp',{en:'MCP servers',de:'MCP-Server'},'vr','plat',{en:'Connect supported agents to approved tools and data through Model Context Protocol. Scope credentials and tool permissions.',de:'Verbindet unterstützte Agenten über das Model Context Protocol mit freigegebenen Tools und Daten. Zugangsdaten und Rechte begrenzen.'},U.mcp),
+ feature('connectors',{en:'Copilot connectors',de:'Copilot Connectors'},'vr','plat',{en:'Connect approved external services so supported clients can bring project context into an agent session.',de:'Verbindet freigegebene externe Dienste, damit unterstützte Clients Projektkontext in eine Agent-Session einbeziehen können.'},U.cheat),
+ feature('instructions',{en:'Custom instructions',de:'Custom Instructions'},'vr','plat',{en:'Provide repository, path-specific or organizational guidance so supported Copilot surfaces follow team conventions.',de:'Stellt Repository-, pfadbezogene oder Organisationsvorgaben bereit, damit unterstützte Oberflächen Teamkonventionen berücksichtigen.'},U.instr),
+ feature('prompts',{en:'Prompt files',de:'Prompt-Dateien'},'vr','dev',{en:'Reuse a documented prompt template for a repeatable task in clients that support prompt files.',de:'Nutzt eine dokumentierte Prompt-Vorlage für wiederkehrende Aufgaben in unterstützten Clients erneut.'},U.cheat),
+ feature('custom-agents',{en:'Custom agents',de:'Custom Agents'},'vr','plat',{en:'Define specialist agents with tailored instructions, context and available tools where supported.',de:'Definiert spezialisierte Agenten mit angepassten Anweisungen, Kontext und verfügbaren Tools, sofern unterstützt.'},U.cheat),
+ feature('subagents',{en:'Subagents',de:'Subagenten'},'vr','dev',{en:'Delegate a bounded subtask to an agent with its own context and return the result to the main agent.',de:'Übergibt eine abgegrenzte Teilaufgabe an einen Agenten mit eigenem Kontext und gibt das Ergebnis an den Hauptagenten zurück.'},U.cheat),
+ feature('skills',{en:'Agent skills',de:'Agent Skills'},'vr','plat',{en:'Package task-specific instructions and resources for agents to load when relevant.',de:'Bündelt aufgabenspezifische Anweisungen und Ressourcen, die Agenten bei Bedarf laden.'},U.cheat),
+ feature('hooks',{en:'Agent hooks',de:'Agent Hooks'},'vr','plat',{en:'Run configured shell commands at supported agent lifecycle events for checks or guardrails.',de:'Führt konfigurierte Shell-Befehle bei unterstützten Agent-Ereignissen für Prüfungen oder Leitplanken aus.'},U.cheat),
+ feature('plugins',{en:'Copilot plugins',de:'Copilot Plugins'},'vr','plat',{en:'Install a package of related skills, agents, hooks or MCP configurations on supported surfaces. Organizations can control approved plugins.',de:'Installiert ein Paket zusammengehöriger Skills, Agenten, Hooks oder MCP-Konfigurationen auf unterstützten Oberflächen. Organisationen können freigegebene Plugins steuern.'},U.plugins),
+ feature('dynamic',{en:'Dynamic workflows',de:'Dynamic Workflows'},'pv','dev',{en:'Orchestrate a defined workflow across subagents for a larger task. This differs from GitHub Actions workflows.',de:'Orchestriert einen definierten Workflow über Subagenten für eine größere Aufgabe. Dies unterscheidet sich von GitHub-Actions-Workflows.'},U.dyn),
+ feature('sandbox',{en:'Local agent sandboxes',de:'Lokale Agent-Sandboxes'},'vr','plat',{en:'Use supported local sandbox controls, including JetBrains agent isolation, to constrain agent execution.',de:'Nutzt unterstützte lokale Sandbox-Kontrollen, darunter Agent-Isolation in JetBrains, um die Ausführung einzugrenzen.'},U.jbCl),
+ feature('checkpoints',{en:'Agent checkpoints',de:'Agent-Checkpoints'},'vr','dev',{en:'Restore a previous state of agent edits in clients that support checkpoints.',de:'Stellt einen früheren Stand von Agent-Änderungen in Clients mit Checkpoint-Unterstützung wieder her.'},U.matrix),
+ feature('references',{en:'Public code references',de:'Referenzen auf öffentlichen Code'},'vr','plat',{en:'When enabled, surface matching public code and known licenses for review; policies can block matching suggestions on supported clients.',de:'Zeigt bei entsprechender Einstellung passenden öffentlichen Code und bekannte Lizenzen zur Prüfung; Richtlinien können Treffer in unterstützten Clients blockieren.'},U.codeReferences),
+ feature('java',{en:'Java Upgrade Agent',de:'Java Upgrade Agent'},'pv','dev',{en:'Use the Java Upgrade Agent in supported VS Code environments to assist with Java application upgrades.',de:'Unterstützt Java-Anwendungs-Upgrades mit dem Java Upgrade Agent in geeigneten VS-Code-Umgebungen.'},U.matrix,'microsoft'),
+ feature('dotnet',{en:'.NET Upgrade Agent',de:'.NET Upgrade Agent'},'vr','dev',{en:'Use the .NET Upgrade Agent in supported Visual Studio environments to help modernize .NET applications.',de:'Unterstützt die Modernisierung von .NET-Anwendungen mit dem .NET Upgrade Agent in geeigneten Visual-Studio-Umgebungen.'},U.matrix,'microsoft'),
+ feature('sdk',{en:'Copilot SDK',de:'Copilot SDK'},'vr','dev',{en:'Build an application with the Copilot agent runtime and custom tools. GitHub Copilot SDK is transitioning to Microsoft Copilot SDK.',de:'Erstellt Anwendungen mit der Copilot-Agent-Laufzeit und eigenen Tools. Das GitHub Copilot SDK wird zum Microsoft Copilot SDK überführt.'},'https://github.blog/changelog/2026-10-28-github-copilot-sdk-is-becoming-microsoft-copilot-sdk/'),
+ feature('commit',{en:'Commit-message assistance',de:'Unterstützung für Commit-Nachrichten'},'vr','dev',{en:'Draft a commit message describing a change in supported IDEs; Copilot review also generates messages for applied suggestions.',de:'Entwirft in unterstützten IDEs eine Commit-Nachricht für eine Änderung; Copilot Review erzeugt ebenfalls Nachrichten für angewendete Vorschläge.'},U.ide),
+ feature('tests',{en:'Test generation and repair',de:'Tests generieren und reparieren'},'vr','dev',{en:'Ask Copilot to generate unit or integration tests, explain failures and propose fixes. Verify assertions and coverage.',de:'Lässt Copilot Unit- oder Integrationstests erstellen, Fehler erklären und Korrekturen vorschlagen. Assertions und Abdeckung prüfen.'},U.ide),
+ feature('coverage',{en:'Automatic coverage setup',de:'Automatische Coverage-Einrichtung'},'ga','plat',{en:'A Code Quality agent can inspect the repository and propose a pull request with a test coverage workflow. Code Quality is a separate product.',de:'Ein Code-Quality-Agent kann das Repository untersuchen und einen Pull Request mit einem Test-Coverage-Workflow vorschlagen. Code Quality ist ein separates Produkt.'},U.coverage,'quality'),
+ feature('computer',{en:'Computer use',de:'Computer Use'},'pv','dev',{en:'With approval, an agent can operate supported desktop applications and interfaces for tasks such as UI checks.',de:'Mit Freigabe kann ein Agent unterstützte Desktop-Anwendungen und Oberflächen bedienen, etwa für UI-Prüfungen.'},U.cu),
+ feature('ci',{en:'CI failure investigation',de:'Untersuchung von CI-Fehlern'},'vr','dev',{en:'Use Chat, CLI or an agent to inspect workflow failures and propose changes. Validate fixes in CI.',de:'Nutzt Chat, CLI oder einen Agenten, um Workflow-Fehler zu untersuchen und Änderungen vorzuschlagen. Korrekturen in CI prüfen.'},U.cli),
+ feature('review',{en:'Copilot code review',de:'Copilot Code Review'},'ga','dev',{en:'Reviews pull requests or supported local changes, flags potential issues and may suggest fixes. Human review remains important.',de:'Prüft Pull Requests oder unterstützte lokale Änderungen, meldet mögliche Probleme und schlägt gegebenenfalls Fixes vor. Menschliches Review bleibt wichtig.'},U.review),
+ feature('pr-summary',{en:'Pull request summaries',de:'Pull-Request-Zusammenfassungen'},'vr','dev',{en:'Generate a description or comment summarizing a pull request so reviewers can understand the change.',de:'Erstellt eine Beschreibung oder einen Kommentar zum Pull Request, damit Reviewer die Änderung schneller verstehen.'},U.prSummary),
+ feature('followup',{en:'Agent review follow-up',de:'Agent-Folgearbeit nach Review'},'vr','dev',{en:'Ask the cloud agent to address review comments and update its pull request; inspect the resulting changes.',de:'Beauftragt den Cloud Agent, Review-Kommentare zu bearbeiten und seinen Pull Request zu aktualisieren. Änderungen prüfen.'},U.cloud),
+ feature('quality',{en:'GitHub Code Quality',de:'GitHub Code Quality'},'ga','plat',{en:'A separate product for CodeQL-based PR quality findings, coverage, AI findings on recent default-branch changes and suggested fixes. Billing applies.',de:'Separates Produkt für CodeQL-basierte PR-Qualitätsbefunde, Coverage, KI-Befunde für kürzlich geänderten Code im Default-Branch und Fix-Vorschläge. Abrechnung fällt an.'},U.quality,'quality'),
+ feature('agent-merge',{en:'Agent Merge',de:'Agent Merge'},'vr','dev',{en:'Watches for selected failing Actions workflows or merge conflicts and proposes fixes. Auto-merge is separate and repository requirements still apply.',de:'Überwacht ausgewählte fehlgeschlagene Actions-Workflows oder Merge-Konflikte und schlägt Fixes vor. Auto-Merge ist separat; Repository-Regeln gelten weiterhin.'},U.agentMerge),
+ feature('automations',{en:'Copilot automations',de:'Copilot Automations'},'vr','dev',{en:'Run agent tasks on a schedule, repository event or API trigger. GitHub-hosted automations require eligible private or internal repositories and policies.',de:'Startet Agent-Aufgaben nach Zeitplan, Repository-Ereignis oder API-Auslöser. GitHub-gehostete Automations benötigen geeignete private oder interne Repositories und Richtlinien.'},U.automations),
+ feature('agentic-workflows',{en:'GitHub Agentic Workflows',de:'GitHub Agentic Workflows'},'ga','plat',{en:'Define agent tasks in Markdown and run them in GitHub Actions, with declared permissions and safe outputs. Copilot or other supported agents can be used.',de:'Definiert Agent-Aufgaben in Markdown und führt sie in GitHub Actions mit festgelegten Rechten und Safe Outputs aus. Copilot oder andere unterstützte Agenten sind möglich.'},U.agenticWorkflows,'actions'),
+ feature('scan-pr',{en:'AI Scan for pull requests',de:'AI Scan für Pull Requests'},'ga','plat',{en:'Finds vulnerabilities in eligible PR changes for selected languages outside CodeQL coverage. Findings are advisory and do not block merges; fork and Dependabot PRs are excluded. Private or internal organization repositories need Code Security or GHAS. AI credits apply; no Copilot license is required.',de:'Findet Schwachstellen in geeigneten PR-Änderungen für ausgewählte Sprachen außerhalb der CodeQL-Abdeckung. Befunde sind Hinweise und blockieren Merges nicht; Fork- und Dependabot-PRs sind ausgeschlossen. Private oder interne Organisations-Repositories benötigen Code Security oder GHAS. AI Credits fallen an; eine Copilot-Lizenz ist nicht nötig.'},U.aiScanPr,'code'),
+ feature('scan-repo',{en:'AI Scan for repositories',de:'AI Scan für Repositories'},'pv','plat',{en:'Runs on demand on the default branch across languages and adds findings to the backlog; it does not guarantee a complete scan. Rescan to verify fixes. Private or internal organization repositories need Code Security or GHAS. AI credits apply; no Copilot license is required.',de:'Läuft auf Abruf im Default-Branch über mehrere Sprachen und ergänzt den Security-Backlog; eine vollständige Prüfung ist nicht garantiert. Fixes durch erneuten Scan prüfen. Private oder interne Organisations-Repositories benötigen Code Security oder GHAS. AI Credits fallen an; eine Copilot-Lizenz ist nicht nötig.'},U.aiScanRepo,'code'),
+ feature('scan-ai-app',{en:'AI applications scanning',de:'AI Applications Scanning'},'pv','plat',{en:'Scans eligible PRs for indirect prompt injection in AI agents during preview. Findings are advisory. Requires GitHub Advanced Security and AI credits, including for eligible public repositories.',de:'Prüft geeignete PRs während der Preview auf indirekte Prompt Injection in KI-Agenten. Befunde sind Hinweise. Benötigt GitHub Advanced Security und AI Credits, auch für geeignete öffentliche Repositories.'},U.aiApp,'advanced'),
+ feature('codeql',{en:'CodeQL code scanning',de:'CodeQL Code Scanning'},'ga','plat',{en:'CodeQL analyzes supported code for vulnerabilities and produces alerts that Copilot can help explain or fix. Repository eligibility and licensing vary.',de:'CodeQL analysiert unterstützten Code auf Schwachstellen und erstellt Alerts, die Copilot erklären oder beheben kann. Voraussetzungen und Lizenzen variieren je Repository.'},U.codeql,'code'),
+ feature('autofix',{en:'Copilot Autofix for code scanning',de:'Copilot Autofix für Code Scanning'},'ga','plat',{en:'Suggests one potential change for a supported alert for a person to review and apply. Code-scanning suggestions do not consume AI credits or require a Copilot subscription.',de:'Schlägt eine mögliche Änderung für einen unterstützten Alert vor, die eine Person prüft und anwendet. Code-Scanning-Vorschläge verbrauchen keine AI Credits und benötigen kein Copilot-Abo.'},U.autofix,'code'),
+ feature('agentic-autofix',{en:'Agentic autofix',de:'Agentic Autofix'},'ga','plat',{en:'Assign eligible default-branch alerts to an agent that investigates, proposes a fix and attempts validation before opening a draft PR. Requires enablement and billing; Code Security AI credits and Actions minutes apply.',de:'Übergibt geeignete Alerts des Default-Branch an einen Agenten, der untersucht, einen Fix vorschlägt und eine Validierung versucht, bevor er einen Draft-PR eröffnet. Aktivierung und Abrechnung sind nötig; Code Security AI Credits und Actions-Minuten fallen an.'},U.autofix,'code'),
+ feature('security-extension',{en:'GitHub security extension for the Copilot app',de:'GitHub Security Extension für die Copilot App'},'pv','plat',{en:'Review local changes and explain or help fix existing code-scanning alerts in the app. A Copilot plan is needed; private-repository alerts also require Code Security and access.',de:'Prüft lokale Änderungen und erklärt oder behebt bestehende Code-Scanning-Alerts in der App. Ein Copilot-Plan ist nötig; für Alerts privater Repositories zusätzlich Code Security und Zugriff.'},U.securityExtension),
+ feature('agent-security',{en:'Cloud agent built-in validation',de:'Integrierte Cloud-Agent-Validierung'},'ga','dev',{en:'The coding agent checks its own changes with CodeQL, secret scanning, dependency checks and quality review. This scoped validation is not full repository security coverage.',de:'Der Coding Agent prüft eigene Änderungen mit CodeQL, Secret Scanning, Dependency-Prüfungen und Qualitätsreview. Diese begrenzte Prüfung ersetzt keine vollständige Repository-Sicherheitsabdeckung.'},U.agentSecurity),
+ feature('generic-secret',{en:'AI-powered generic secret detection',de:'KI-gestützte generische Secret-Erkennung'},'vr','plat',{en:'Uses AI to flag unstructured secrets that fixed patterns may miss. It is a Secret Protection capability and does not require a Copilot subscription.',de:'Markiert mit KI unstrukturierte Secrets, die feste Muster übersehen können. Dies ist eine Secret-Protection-Funktion und benötigt kein Copilot-Abo.'},U.securityAI,'secret'),
+ feature('regex-secret',{en:'AI-generated secret patterns',de:'KI-generierte Secret-Muster'},'vr','plat',{en:'Generates candidate regular expressions from a description for custom secret scanning patterns. Validate patterns before enabling them.',de:'Erzeugt aus einer Beschreibung Regex-Vorschläge für eigene Secret-Scanning-Muster. Muster vor der Aktivierung validieren.'},U.securityAI,'secret'),
+ feature('push-protection',{en:'Secret scanning and push protection',de:'Secret Scanning und Push Protection'},'vr','plat',{en:'Related GitHub security controls detect secrets and can prevent supported secrets being pushed. Product eligibility and configuration apply.',de:'Zugehörige GitHub-Sicherheitsfunktionen erkennen Secrets und können das Pushen unterstützter Secrets verhindern. Produktvoraussetzungen und Konfiguration gelten.'},U.pushProtection,'secret'),
+ feature('ai-push',{en:'Push protection for AI-detected secrets',de:'Push Protection für KI-erkannte Secrets'},'pv','plat',{en:'Can block pushes containing generic secrets such as passwords detected with AI. Requires Secret Protection or GHAS, separate enablement and AI credits.',de:'Kann Pushes mit KI-erkannten generischen Secrets wie Passwörtern blockieren. Benötigt Secret Protection oder GHAS, separate Aktivierung und AI Credits.'},U.aiPush,'secret'),
+ feature('content-exclusion',{en:'Copilot content exclusion',de:'Copilot Content Exclusion'},'vr','plat',{en:'Exclude selected files from supported Copilot experiences. Coverage differs by client and agent, so check the documented limitations.',de:'Schließt ausgewählte Dateien von unterstützten Copilot-Funktionen aus. Der Umfang unterscheidet sich je Client und Agent; dokumentierte Einschränkungen prüfen.'},U.contentExclusion),
+ feature('policy',{en:'Policies and model control',de:'Richtlinien und Modellsteuerung'},'ga','plat',{en:'Configure enterprise and organization access to supported features, models and agents; client-specific settings can differ.',de:'Steuert den Enterprise- und Organisationszugriff auf unterstützte Funktionen, Modelle und Agenten; Client-Einstellungen können abweichen.'},U.policies),
+ feature('audit',{en:'Audit logs',de:'Audit-Logs'},'ga','plat',{en:'Review supported Copilot policy changes and GitHub-hosted activity events in audit logs.',de:'Prüft unterstützte Copilot-Richtlinienänderungen und GitHub-gehostete Aktivitäten in Audit-Logs.'},U.audit),
+ feature('metrics',{en:'Metrics dashboard and API',de:'Metrics-Dashboard und API'},'ga','lead',{en:'Review adoption, engagement and agent usage across supported organizations and teams.',de:'Zeigt Adoption, Nutzung und Agent-Einsatz für unterstützte Organisationen und Teams.'},U.dash),
+ feature('billing',{en:'AI credit usage and budgets',de:'AI-Credit-Nutzung und Budgets'},'ga','lead',{en:'Track usage and configure budgets. Included credits, model rates and separate product charges vary by plan.',de:'Überwacht Nutzung und konfiguriert Budgets. Enthaltene Credits, Modellpreise und separate Produktkosten hängen vom Plan ab.'},U.billing)
+];
+const FEATURES_BY_ID=Object.fromEntries(FEAT.map(f=>[f.id,f]));
+const stageUse=(id,en,de)=>({id,description:en===undefined?null:{en,de}});
+const COMMON_FEATURES=['memory','models','fusion','byok','mcp','connectors','instructions','prompts','custom-agents','subagents','skills','hooks','plugins','dynamic'];
+const STAGE_FEATURES=[
+ {core:[
+  stageUse('planning'),
+  stageUse('issues'),
+  stageUse('chat','Turn a request into an outline, acceptance criteria or a set of questions for the team.','Formuliert aus einer Anforderung einen Entwurf, Akzeptanzkriterien oder Fragen für das Team.'),
+  stageUse('spaces'),
+  stageUse('index','Find relevant repository context to understand existing behavior before scoping work.','Findet relevanten Repository-Kontext, um bestehendes Verhalten vor der Planung zu verstehen.'),
+  stageUse('vision','Use a supported screenshot or design mock-up to clarify the desired result.','Nutzt einen unterstützten Screenshot oder Designentwurf, um das gewünschte Ergebnis zu klären.'),
+  stageUse('projects'),
+  stageUse('app','Keep plans, context and sessions together in the Copilot desktop app.','Hält Pläne, Kontext und Sessions in der Copilot-Desktop-App zusammen.'),
+  stageUse('cli','Investigate the repository and prepare a plan from the terminal.','Untersucht das Repository und erstellt einen Plan im Terminal.'),
+  stageUse('cloud','Assign a well-scoped issue to the cloud agent after the team reviews its requirements.','Übergibt ein klar umrissenes Issue nach Prüfung der Anforderungen an den Cloud Agent.'),
+  stageUse('integrations'),
+  stageUse('automations','Triage or label new issues using configured repository-event, scheduled or API triggers. Cloud automation eligibility and policy apply.','Triagiert oder markiert neue Issues anhand konfigurierter Repository-Ereignisse, Zeitpläne oder API-Auslöser. Voraussetzungen und Richtlinien für Cloud-Automations gelten.'),
+  stageUse('agentic-workflows','Use a Markdown-defined Actions workflow to triage issues or prepare repository status reports.','Nutzt einen Markdown-definierten Actions-Workflow zur Issue-Triage oder für Repository-Statusberichte.')
+ ],shared:[...COMMON_FEATURES,'content-exclusion','sandbox']},
+ {core:[
+  stageUse('completions'),stageUse('nes'),stageUse('inline-edit'),
+  stageUse('chat','Explain existing code, draft implementations, refactor a function or write documentation.','Erklärt vorhandenen Code, entwirft Implementierungen, refaktoriert Funktionen oder schreibt Dokumentation.'),
+  stageUse('agent-mode'),stageUse('cli'),stageUse('app'),stageUse('cloud'),stageUse('partners'),stageUse('integrations'),
+  stageUse('index'),stageUse('vision'),stageUse('references'),stageUse('checkpoints'),
+  stageUse('java'),stageUse('dotnet'),stageUse('sdk'),stageUse('commit')
+ ],shared:[...COMMON_FEATURES,'spaces','content-exclusion','sandbox']},
+ {core:[
+  stageUse('tests'),
+  stageUse('agent-mode','Ask an IDE agent to add tests, run the suite and iterate on failures within its permissions.','Beauftragt einen IDE-Agenten, Tests zu ergänzen, die Suite auszuführen und Fehler innerhalb seiner Rechte zu bearbeiten.'),
+  stageUse('cli','Run or investigate test commands from a terminal session, after reviewing permissions.','Führt Testbefehle in einer Terminal-Session aus oder untersucht sie, nach Prüfung der Berechtigungen.'),
+  stageUse('app','Run and inspect parallel test or debugging sessions in the desktop app.','Startet und prüft parallele Test- oder Debugging-Sessions in der Desktop-App.'),
+  stageUse('cloud','Delegate an issue to improve tests or coverage; inspect the draft PR and actual test results.','Übergibt ein Issue zur Verbesserung von Tests oder Coverage; Draft-PR und tatsächliche Testergebnisse prüfen.'),
+  stageUse('computer'),stageUse('coverage'),stageUse('quality'),
+  stageUse('ci'),stageUse('chat','Explain a failing test, suggest edge cases and review assertions.','Erklärt einen fehlschlagenden Test, schlägt Randfälle vor und prüft Assertions.'),
+  stageUse('automations','Trigger a configured agent task to reproduce a reported bug or prepare repeatable checks.','Startet eine konfigurierte Agent-Aufgabe, um einen gemeldeten Fehler zu reproduzieren oder wiederholbare Prüfungen vorzubereiten.'),
+  stageUse('agentic-workflows','Schedule agentic Actions tasks to investigate test failures or improve test coverage.','Plant Agentic-Actions-Aufgaben zur Untersuchung von Testfehlern oder zur Verbesserung der Testabdeckung.')
+ ],shared:[...COMMON_FEATURES,'spaces','index','vision','content-exclusion','sandbox']},
+ {core:[
+  stageUse('review'),stageUse('pr-summary'),stageUse('followup'),stageUse('quality'),
+  stageUse('coverage','A generated coverage workflow can feed coverage results into pull request review when Code Quality is enabled.','Ein generierter Coverage-Workflow kann bei aktiviertem Code Quality Coverage-Ergebnisse im Pull-Request-Review bereitstellen.'),
+  stageUse('agent-merge'),stageUse('references'),
+  stageUse('chat','Ask questions about a pull request or diff and identify areas that need human attention.','Beantwortet Fragen zu einem Pull Request oder Diff und zeigt Bereiche für menschliche Prüfung.'),
+  stageUse('cloud','Respond to feedback on the agent pull request and review its follow-up commits.','Bearbeitet Feedback zum Agent-Pull-Request; Folge-Commits müssen geprüft werden.'),
+  stageUse('cli','Inspect a pull request and address review feedback from the terminal.','Prüft einen Pull Request und bearbeitet Review-Feedback im Terminal.'),
+  stageUse('app','Track agent pull requests and review their changes from the desktop app.','Verfolgt Agent-Pull-Requests und prüft ihre Änderungen in der Desktop-App.'),
+  stageUse('automations','Capture review screenshots or run other configured checks when a pull request event occurs.','Erstellt Review-Screenshots oder führt andere konfigurierte Prüfungen bei einem Pull-Request-Ereignis aus.'),
+  stageUse('agentic-workflows','Automate a review-adjacent task such as reporting or CI investigation through Actions.','Automatisiert reviewnahe Aufgaben wie Berichte oder CI-Untersuchungen über Actions.')
+ ],shared:[...COMMON_FEATURES,'spaces','index','vision','content-exclusion','sandbox']},
+ {core:[
+  stageUse('scan-pr'),stageUse('scan-repo'),stageUse('scan-ai-app'),
+  stageUse('codeql'),stageUse('autofix'),stageUse('agentic-autofix'),
+  stageUse('security-extension'),stageUse('agent-security'),
+  stageUse('generic-secret'),stageUse('regex-secret'),stageUse('push-protection'),stageUse('ai-push'),stageUse('content-exclusion'),
+  stageUse('review','Copilot review can flag potential security issues, but it does not replace dedicated scanning or a security review.','Copilot Review kann mögliche Sicherheitsprobleme markieren, ersetzt aber weder dediziertes Scanning noch ein Security Review.'),
+  stageUse('chat','Explain an alert, propose remediation and help draft a regression test. Validate the fix before merging.','Erklärt einen Alert, schlägt eine Behebung vor und hilft beim Regressionstest. Fix vor dem Merge validieren.'),
+  stageUse('cloud','Implement a scoped security fix and open a reviewable pull request, subject to access and policy.','Implementiert einen abgegrenzten Security-Fix und eröffnet einen prüfbaren Pull Request, abhängig von Zugriff und Richtlinie.'),
+  stageUse('sandbox'),stageUse('policy'),stageUse('audit')
+ ],shared:[...COMMON_FEATURES,'spaces','index']},
+ {core:[
+  stageUse('ci'),
+  stageUse('cli','Investigate failed workflows, inspect logs and draft operational scripts or runbooks. Review commands before execution.','Untersucht fehlgeschlagene Workflows, prüft Logs und entwirft Betriebsskripte oder Runbooks. Befehle vor der Ausführung prüfen.'),
+  stageUse('app','Coordinate incident investigation or maintenance work in local and cloud sessions.','Koordiniert Incident-Untersuchungen oder Wartungsarbeiten in lokalen und Cloud-Sessions.'),
+  stageUse('chat','Summarize an incident, explain logs or draft a runbook using the context available to the session.','Fasst einen Incident zusammen, erklärt Logs oder entwirft ein Runbook anhand des verfügbaren Session-Kontexts.'),
+  stageUse('automations','Schedule maintenance or start an incident investigation from an approved event or API trigger.','Plant Wartungsaufgaben oder startet eine Incident-Untersuchung über ein freigegebenes Ereignis oder einen API-Auslöser.'),
+  stageUse('agentic-workflows','Run repository maintenance, CI investigations or status reports as guarded GitHub Actions workflows.','Führt Repository-Wartung, CI-Untersuchungen oder Statusberichte als abgesicherte GitHub-Actions-Workflows aus.'),
+  stageUse('agent-merge'),stageUse('cloud'),stageUse('projects'),stageUse('integrations'),
+  stageUse('metrics'),stageUse('audit'),stageUse('policy'),stageUse('billing')
+ ],shared:[...COMMON_FEATURES,'spaces','index','content-exclusion','sandbox']}
+];
+const GOV=[
+ {h:{en:'Access and policy',de:'Zugriff und Richtlinien'},l:[{en:'Seat assignment by organization or team',de:'Lizenzvergabe nach Organisation oder Team'},{en:'Enable or block each feature, model and agent',de:'Jede Funktion, jedes Modell und jeden Agenten freigeben oder sperren'},{en:'Enterprise policies override organization settings',de:'Enterprise-Richtlinien übersteuern Org-Einstellungen'}],u:U.policies},
+ {h:{en:'Data and model handling',de:'Daten und Modelle'},l:[{en:'Model availability set by policy',de:'Modellverfügbarkeit per Richtlinie'},{en:'Check per-model data notes, for example Claude Fable retention',de:'Datenhinweise je Modell prüfen, z. B. Speicherung bei Claude Fable'},{en:'Review MCP configuration and access for each client',de:'MCP-Konfiguration und Zugriff je Client prüfen'}],u:U.models},
+ {h:{en:'Agent safety',de:'Agenten-Sicherheit'},l:[{en:'Cloud agents work in isolated environments',de:'Cloud-Agenten arbeiten in isolierten Umgebungen'},{en:'Require human approval through repository rules',de:'Menschliche Freigabe per Repository-Regeln verlangen'},{en:'Configure the cloud agent firewall and environment',de:'Firewall und Umgebung des Cloud Agents konfigurieren'}],u:U.resp},
+ {h:{en:'Audit',de:'Audit'},l:[{en:'Policy changes in enterprise audit log',de:'Richtlinienänderungen im Enterprise-Audit-Log'},{en:'Agent sessions visible in PR timeline',de:'Agent-Sessions in der PR-Timeline sichtbar'},{en:'Stream to your SIEM with audit log streaming',de:'Per Audit-Log-Streaming ins SIEM'}],u:U.audit},
+ {h:{en:'Measurement',de:'Messung'},l:[{en:'Daily and weekly active users',de:'Täglich und wöchentlich aktive Nutzer'},{en:'Acceptance rates, chat and agent usage',de:'Akzeptanzraten, Chat- und Agent-Nutzung'},{en:'Breakdown by IDE, language and model',de:'Aufschlüsselung nach IDE, Sprache und Modell'}],u:U.metrics},
+ {h:{en:'Cost control',de:'Kostensteuerung'},l:[{en:'AI credits charged per token by model',de:'AI Credits pro Token je Modell'},{en:'Budgets and cost centers',de:'Budgets und Kostenstellen'},{en:'Completions and NES outside credit billing',de:'Vervollständigung und NES außerhalb der Credit-Abrechnung'}],u:U.billing}];
+const PHASES=[
+ [{en:'Foundation',de:'Fundament'},{en:'Weeks 1 to 2',de:'Woche 1 bis 2'},[{en:'Set enterprise policies, models and MCP allow list',de:'Enterprise-Richtlinien, Modelle und MCP-Allowlist festlegen'},{en:'Add repository custom instructions',de:'Repository-Instructions anlegen'},{en:'Pick 2 to 3 pilot teams',de:'2 bis 3 Pilotteams wählen'}],{en:'KPI: policies set, pilot seats active',de:'KPI: Richtlinien gesetzt, Pilot-Lizenzen aktiv'}],
+ [{en:'Pilot',de:'Pilot'},{en:'Weeks 3 to 8',de:'Woche 3 bis 8'},[{en:'IDE completions, chat and agent mode',de:'IDE-Vervollständigung, Chat und Agent Mode'},{en:'Copilot code review on all pilot PRs',de:'Copilot Code Review auf allen Pilot-PRs'},{en:'Weekly feedback and prompt library',de:'Wöchentliches Feedback und Prompt-Bibliothek'}],{en:'KPI: weekly active users, acceptance rate, PR cycle time',de:'KPI: wöchentlich aktive Nutzer, Akzeptanzrate, PR-Durchlaufzeit'}],
+ [{en:'Scale',de:'Skalieren'},{en:'Months 3 to 4',de:'Monat 3 bis 4'},[{en:'Roll out to all teams with champions',de:'Rollout an alle Teams mit Champions'},{en:'Cloud agent on scoped backlog items',de:'Cloud Agent auf klar umrissene Backlog-Items'},{en:'Fusion as default, budgets per cost center',de:'Fusion als Standard, Budgets je Kostenstelle'}],{en:'KPI: share of PRs agent-authored, merge rate, credit spend per team',de:'KPI: Anteil Agent-PRs, Merge-Rate, Credit-Verbrauch je Team'}],
+ [{en:'Optimize',de:'Optimieren'},{en:'Month 5 onward',de:'Ab Monat 5'},[{en:'Custom agents and MCP to internal systems',de:'Custom Agents und MCP zu internen Systemen'},{en:'Automations for recurring work',de:'Automations für wiederkehrende Arbeit'},{en:'Compare agents in Agent HQ',de:'Agenten in Agent HQ vergleichen'}],{en:'KPI: lead time, change failure rate, developer survey',de:'KPI: Lead Time, Change Failure Rate, Entwicklerumfrage'}]];
+const E2E=[
+ [{en:'Plan',de:'Planen'},{en:'Spaces drafts issues',de:'Spaces entwirft Issues'}],
+ [{en:'Build',de:'Bauen'},{en:'Cloud agent opens PR',de:'Cloud Agent eröffnet PR'}],
+ [{en:'Refine',de:'Verfeinern'},{en:'Dev iterates in IDE or app',de:'Dev iteriert in IDE oder App'}],
+ [{en:'Test',de:'Testen'},{en:'Agent adds tests, Actions runs',de:'Agent ergänzt Tests, Actions läuft'}],
+ [{en:'Review',de:'Review'},{en:'Copilot review, human approves',de:'Copilot Review, Mensch gibt frei'}],
+ [{en:'Secure',de:'Absichern'},{en:'Scanning and Autofix',de:'Scanning und Autofix'}],
+ [{en:'Ship and measure',de:'Ausliefern und messen'},{en:'Merge, metrics, audit',de:'Merge, Metriken, Audit'}]];
+const FAQ=[
+ [{en:'Can we use Claude models in Copilot?',de:'Können wir Claude-Modelle in Copilot nutzen?'},{en:'Yes. Claude Haiku, Sonnet, Opus and Fable models are in the model picker when your policy allows them. Separately, the Anthropic Claude agent runs in Agent HQ (public preview) and is billed through the Copilot subscription.',de:'Ja. Claude Haiku, Sonnet, Opus und Fable stehen in der Modellauswahl, wenn die Richtlinie sie erlaubt. Zusätzlich läuft der Anthropic-Claude-Agent in Agent HQ (Public Preview), abgerechnet über das Copilot-Abo.'}],
+ [{en:'Is our code used to train models?',de:'Wird unser Code zum Training genutzt?'},{en:'Data handling commitments for Business and Enterprise are documented in the <a href="https://copilot.github.trust.page/" target="_blank">GitHub Copilot Trust Center</a>. Also check the per-model data notes on the <a href="'+U.models+'" target="_blank">supported models</a> page, for example the default retention for Claude Fable.',de:'Zusagen zur Datenverarbeitung für Business und Enterprise stehen im <a href="https://copilot.github.trust.page/" target="_blank">GitHub Copilot Trust Center</a>. Zusätzlich die Datenhinweise je Modell auf der <a href="'+U.models+'" target="_blank">Supported-Models-Seite</a> prüfen, z. B. die Standardspeicherung bei Claude Fable.'}],
+ [{en:'What does HydraFusion mean now?',de:'Was bedeutet HydraFusion heute?'},{en:'HydraFusion was the research preview. Since 28 Oct 2026 it is part of Copilot Fusion, which also replaced Auto model selection.',de:'HydraFusion war die Research Preview. Seit 28. Okt. 2026 ist es Teil von Copilot Fusion, das auch die automatische Modellauswahl ersetzt.'}],
+ [{en:'How do we control cost?',de:'Wie steuern wir Kosten?'},{en:'Set budgets per cost center, restrict expensive models by policy, and track spend in the billing and metrics views. Inline completions and NES do not consume credits.',de:'Budgets je Kostenstelle setzen, teure Modelle per Richtlinie einschränken, Verbrauch in Billing- und Metrics-Ansichten verfolgen. Inline-Vervollständigung und NES verbrauchen keine Credits.'}],
+ [{en:'Can an agent merge to main on its own?',de:'Kann ein Agent selbstständig nach main mergen?'},{en:'Agent Merge can fix selected blockers. Auto-merge is configured separately and GitHub merges only when repository requirements are met. Human approvals remain required when your rules require them. <a href="'+U.agentMerge+'" target="_blank" rel="noopener">Agent Merge</a>',de:'Agent Merge kann ausgewählte Hindernisse beheben. Auto-Merge wird separat konfiguriert; GitHub führt den Merge erst aus, wenn die Repository-Anforderungen erfüllt sind. Menschliche Freigaben bleiben nötig, wenn Ihre Regeln sie verlangen. <a href="'+U.agentMerge+'" target="_blank" rel="noopener">Agent Merge</a>'}],
+ [{en:'Does this work on GitHub Enterprise Server?',de:'Funktioniert das mit GitHub Enterprise Server?'},{en:'This overview targets GitHub Enterprise Cloud. Feature availability on GHES differs, so check the GHES docs for your version.',de:'Dieser Überblick bezieht sich auf GitHub Enterprise Cloud. Auf GHES weicht die Verfügbarkeit ab, bitte GHES-Doku zur eigenen Version prüfen.'}],
+ [{en:'How do we prove value?',de:'Wie belegen wir den Nutzen?'},{en:'Baseline PR cycle time and lead time before the pilot, then compare with the Copilot metrics dashboard and a short developer survey after 6 to 8 weeks.',de:'PR-Durchlaufzeit und Lead Time vor dem Pilot erfassen, nach 6 bis 8 Wochen mit Copilot-Metrics-Dashboard und kurzer Entwicklerumfrage vergleichen.'}]];
+const SRC=[
+ [{en:'Surfaces',de:'Oberflächen'},[['Copilot in IDEs',U.ide],['Code suggestions',U.sugg],['Agent mode',U.agentMode],['Copilot CLI',U.cli],['GitHub Copilot app',U.app],['Cloud agent',U.cloud],['Feature matrix',U.matrix]]],
+ [{en:'Models and Fusion',de:'Modelle und Fusion'},[['Supported models',U.models],['Model comparison',U.compare],['Copilot Fusion docs',U.fusion],['Fusion GA changelog',U.fusionCl],['HydraFusion Max changelog',U.hydraCl],['Auto model selection',U.auto],['Default model settings',U.fusionAdmin]]],
+ [{en:'Agents',de:'Agenten'},[['Third-party agents',U.third],['Agent HQ blog',U.hqBlog],['Code review',U.review],['Dynamic workflows',U.dyn],['Computer use',U.cu],['Weekly release, Sep 28',U.weekly],['VS Code September releases',U.vsCl],['JetBrains releases',U.jbCl]]],
+ [{en:'Governance and billing',de:'Governance und Abrechnung'},[['Policies',U.policies],['Audit logs',U.audit],['Usage metrics',U.metrics],['Metrics dashboard',U.dash],['Billing',U.billing],['Plans',U.plans],['Responsible use of agents',U.resp],['Copilot Trust Center','https://copilot.github.trust.page/'],['Code Quality',U.quality]]],
+ [{en:'Customization',de:'Anpassung'},[['MCP',U.mcp],['Custom instructions',U.instr],['Customization cheat sheet',U.cheat],['Copilot Spaces',U.spaces],['Copilot Memory',U.memory],['Public code references',U.codeReferences]]],
+ [{en:'Lifecycle and security products',de:'Lebenszyklus und Sicherheitsprodukte'},[['AI Scan overview',U.aiScan],['AI Scan for pull requests',U.aiScanPr],['AI Scan for repositories',U.aiScanRepo],['AI applications scanning',U.aiApp],['Autofix for code scanning',U.autofix],['Code Quality and coverage',U.coverage],['Security and quality AI features',U.securityAI],['Security extension for Copilot app',U.securityExtension],['Cloud agent validation',U.agentSecurity],['Copilot automations',U.automations],['GitHub Agentic Workflows',U.agenticWorkflows],['Agent Merge',U.agentMerge],['GitHub Spark retirement',U.sparkRetired]]]];
+let storageWarning=false;
+function readLanguage(){
+ try{return localStorage.getItem('cpLang')==='de'?'de':'en';}
+ catch(error){console.warn('Language preference could not be read.',error);storageWarning=true;return 'en';}
+}
+function rememberLanguage(language){
+ try{localStorage.setItem('cpLang',language);}
+ catch(error){console.warn('Language preference could not be saved.',error);storageWarning=true;}
+}
+let L=readLanguage(),stg=0,prov=null,fRole='all',fStat='all';
+const sharedOpen=STAGES.map(()=>false);
+const t=o=>o==null?'':typeof o==='string'?o:(o[L]||o.en);
+const $=id=>document.getElementById(id);
+const pill=s=>`<span class="pill ${s}">${t(STAT[s])}</span>`;
+const src=(u,lbl)=>`<a class="src" href="${u}" target="_blank" rel="noopener">${lbl||t(SL.doc)}</a>`;
+const MOCKS=[
+ {h:'VS Code · agent mode',b:`<span class="cm">// orders.ts</span>
+<span class="kw">export async function</span> <span class="fn">createOrder</span>(req) {
+  <span class="kw">await</span> rateLimit(req.user)<span class="ghost">  // suggestion</span>
+<span class="ghost">  const order = await db.orders.insert(req.body);
+  return order;</span>
+}
+<div class="chatb"><b>{YOU}:</b> {P}<br><span class="ok">✓</span> {E1}<br><span class="ok">✓</span> {E2}</div>`,p:{en:'Add rate limiting and update tests',de:'Rate Limiting hinzufügen und Tests anpassen'},e1:{en:'Edited 3 files',de:'3 Dateien geändert'},e2:{en:'npm test: 48 passed',de:'npm test: 48 bestanden'}},
+ {h:'Terminal · copilot',b:`<span class="ok">$</span> copilot
+<span class="fn">›</span> {P}
+<span class="cm">● Plan</span>
+  1. gh run view --log-failed
+  2. Fix missing env var in deploy.yml
+  3. Open pull request
+<span class="wa">? Run gh run view 9214? (y/n)</span> y
+<span class="ok">✓</span> {E1}`,p:{en:'why did deploy fail on main?',de:'warum schlug deploy auf main fehl?'},e1:{en:'PR #418 opened',de:'PR #418 erstellt'}},
+ {h:'github.com · pull request',b:`<b style="font-family:sans-serif">#418 Fix deploy env</b> <span class="pill pv">Draft</span>
+<span class="cm">copilot-swe-agent opened this from issue #412</span>
+
+<span class="ok">✓</span> CI / build
+<span class="ok">✓</span> CodeQL
+<span class="wa">●</span> {E1}
+<div class="chatb"><b>Copilot review:</b> {P}</div>`,p:{en:'Consider validating DEPLOY_REGION before use.',de:'DEPLOY_REGION vor Nutzung validieren.'},e1:{en:'Awaiting human approval',de:'Wartet auf menschliche Freigabe'}}];
+function renderStatic(){
+ const featureQuery=$('fq')?$('fq').value:'';
+ const openFaqs=[...document.querySelectorAll('#faqs details')].map(d=>d.open);
+ document.documentElement.lang=L;
+ document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(D[e.dataset.i]));
+ document.querySelectorAll('[data-ih]').forEach(e=>e.innerHTML=t(D[e.dataset.ih]));
+ document.querySelectorAll('[data-a]').forEach(e=>e.setAttribute('aria-label',t(D[e.dataset.a])));
+ $('btn-en').classList.toggle('on',L==='en');$('btn-de').classList.toggle('on',L==='de');
+ $('btn-en').setAttribute('aria-pressed',L==='en');$('btn-de').setAttribute('aria-pressed',L==='de');
+ const primary=['surfaces','sdlc','models','fusion','governance'];
+ $('navlinks').innerHTML=NAV.filter(([id])=>primary.includes(id)).map(([id,l])=>`<a href="#${id}">${t(l)}</a>`).join('');
+ $('navall').innerHTML=NAV.map(([id,l])=>`<a href="#${id}">${t(l)}</a>`).join('');
+ $('stats').innerHTML=STATS.map(([n,l,href])=>`<a class="stat" href="${href}"><b${n==='→'?' aria-hidden="true"':''}>${n}</b><span>${t(l)}</span></a>`).join('');
+ $('tldr').innerHTML=TLDR.map(x=>`<a class="role-path" href="${x.href}"><div class="role-top"><span>${t(x.role)}</span><span class="role-number" aria-hidden="true">${x.n}</span></div><h3>${t(x.h)}</h3><p>${t(x.d)}</p><span class="role-action">${t(x.a)} <span aria-hidden="true">→</span></span></a>`).join('');
+ $('surfCards').innerHTML=SURF.map(s=>`<div class="card"><div class="ico">${s.i}</div><h3>${t(s.h)}</h3><p class="small mut">${t(s.d)}</p>${src(s.u)}</div>`).join('');
+ $('ladder').innerHTML=LADDER.map(([h,d,ht])=>`<div class="rung" style="min-height:${ht+60}px"><b>${t(h)}</b><span class="mut">${t(d)}</span></div>`).join('');
+ const sym={y:'<span class="y">●</span>',p:'<span class="p">◐</span>',n:'<span class="n">○</span>'};
+ $('matrix').innerHTML=`<thead><tr><th></th>${MCOLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`+MROWS.map(([l,v])=>`<tr><td>${t(l)}</td>${[...v].map(c=>`<td>${sym[c]}</td>`).join('')}</tr>`).join('')+'</tbody>';
+ $('mocks').innerHTML=MOCKS.map(m=>`<div><div class="win"><div class="bar"><i></i><i></i><i></i>&nbsp;${m.h}</div><div class="body" style="white-space:pre-wrap">${m.b.replace('{YOU}',L==='de'?'Sie':'You').replace('{P}',t(m.p)).replace('{E1}',t(m.e1)).replace('{E2}',t(m.e2||''))}</div></div><div class="label">${t(D.sceneCaption)}</div></div>`).join('');
+ $('provs').innerHTML=Object.keys(PROV).map(p=>`<button class="prov${prov===p?' on':''}" data-p="${p}" aria-pressed="${prov===p}" style="border-left:4px solid ${PROV[p]}"><b>${MOD.filter(m=>m[1]===p).length}</b><span class="small mut">${p}</span></button>`).join('');
+ $('mq').placeholder=t(D.search);
+ $('modelNotes').innerHTML=MNOTES.map(n=>`<div class="card"><h3>${t(n.h)}</h3><p class="small mut">${t(n.d)}</p>${src(n.u)}</div>`).join('');
+ $('levels').innerHTML=LEVELS.map(([n,w,d])=>`<div class="level"><h3>${n}</h3><div class="meter"><i style="width:${w}%"></i></div><p class="small mut">${t(d)}</p></div>`).join('');
+ $('flows').innerHTML=FLOWS.map(([n,d,s])=>`<div class="flow"><h3>${n}</h3><svg viewBox="0 0 340 150" role="img" aria-label="${n}">${s}</svg><p class="small mut">${t(d)}</p></div>`).join('');
+ $('flows').querySelectorAll('[data-i]').forEach(e=>e.textContent=t(D[e.dataset.i]));
+ $('fusionFacts').innerHTML=FFACTS.map(n=>`<div class="card"><h3>${t(n.h)}</h3><p class="small mut">${t(n.d)}</p>${src(n.u)}</div>`).join('');
+ $('agtable').innerHTML=`<thead><tr>${['a','r','t','o','b'].map(k=>`<th>${t(AGH[k])}</th>`).join('')}</tr></thead><tbody>`+AG.map(a=>`<tr><td><b>${t(a[0])}</b><br>${pill(a[1])} ${src(a[6])}</td><td>${t(a[2])}</td><td>${t(a[3])}</td><td>${t(a[4])}</td><td>${t(a[5])}</td></tr>`).join('')+'</tbody>';
+ $('pipe').innerHTML=PIPE.map(([h,d],i)=>`<div class="step"><span class="n2">${String(i+1).padStart(2,'0')}</span><b>${t(h)}</b><span class="mut">${t(d)}</span></div>`).join('');
+ $('nativeCards').innerHTML=NATIVE.map(s=>`<div class="card"><div class="ico">${s.i}</div><h3>${t(s.h)}</h3><p class="small mut">${t(s.d)}</p>${src(s.u)}</div>`).join('');
+ $('ftools').innerHTML=`<input id="fq" type="search" placeholder="${t(D.search)}" aria-label="${t(D.searchFeatures)}"><div class="filter-group" role="group" aria-label="${t(D.roleFilter)}"><span class="filter-caption">${t(D.roleFilter)}</span>`+
+  ['all',...Object.keys(ROLES)].map(r=>`<button class="chip${fRole===r?' on':''}" data-r="${r}" aria-pressed="${fRole===r}">${r==='all'?t(D.all):t(ROLES[r])}</button>`).join('')+
+  `</div><div class="filter-group" role="group" aria-label="${t(D.statusFilter)}"><span class="filter-caption">${t(D.statusFilter)}</span>`+
+  ['all','ga','pv','vr'].map(s=>`<button class="chip${fStat===s?' on':''}" data-s="${s}" aria-pressed="${fStat===s}">${s==='all'?t(D.all):t(STAT[s])}</button>`).join('')+'</div>';
+ $('fq').value=featureQuery;
+ $('govCards').innerHTML=GOV.map(g=>`<div class="card"><h3>${t(g.h)}</h3><ul class="small">${g.l.map(x=>`<li>${t(x)}</li>`).join('')}</ul>${src(g.u)}</div>`).join('');
+ $('phases').innerHTML=PHASES.map(([h,w,l,k])=>`<div class="phase"><h3>${t(h)}</h3><div class="small mut">${t(w)}</div><ul class="small">${l.map(x=>`<li>${t(x)}</li>`).join('')}</ul><div class="kpi">${t(k)}</div></div>`).join('');
+ $('e2e').innerHTML=E2E.map(([h,d],i)=>`<div class="step"><span class="n2">${String(i+1).padStart(2,'0')}</span><b>${t(h)}</b><span class="mut">${t(d)}</span></div>`).join('');
+ $('faqs').innerHTML=FAQ.map(([q,a],i)=>`<details${openFaqs[i]?' open':''}><summary>${t(q)}</summary><p>${t(a)}</p></details>`).join('');
+ $('srcs').innerHTML=SRC.map(([h,l])=>`<h3>${t(h)}</h3><ul>${l.map(([n,u])=>`<li><a href="${u}" target="_blank" rel="noopener">${n}</a></li>`).join('')}</ul>`).join('');
+ renderTabs();renderModels();renderFeatures();renderPrint();
+ $('fq').addEventListener('input',renderFeatures);
+ $('storage-notice').hidden=!storageWarning;
+ $('storage-notice').textContent=storageWarning?t(D.storageNotice):'';
+}
+function renderTabs(){
+ const previous=$('stage').querySelector('.stage-shared');
+ if(previous)sharedOpen[Number(previous.dataset.stageIndex)]=previous.open;
+ $('tabs').innerHTML=STAGES.map((s,i)=>`<button id="tab-${i}" role="tab" aria-controls="stage" aria-selected="${i===stg}" tabindex="${i===stg?'0':'-1'}" data-t="${i}">${i+1}. ${t(s.k)}</button>`).join('');
+ const s=STAGES[stg],mapped=STAGE_FEATURES[stg];
+ $('stage').setAttribute('aria-labelledby',`tab-${stg}`);
+ $('stage').innerHTML=`<div class="card"><h3>${t(s.k)}</h3><dl class="kv"><dt>${t(SL.what)}</dt><dd>${t(s.what)}</dd><dt>${t(SL.where)}</dt><dd>${t(s.where)}</dd><dt>${t(SL.human)}</dt><dd>${t(s.human)}</dd></dl>${src(s.u)}</div><div class="card"><div class="small mut" style="margin-bottom:6px">${t(SL.prompt)}</div><div class="prompt">${t(s.prompt)}</div></div><div class="stage-features"><div class="stage-features-head"><h3>${t(D.stageFeatures)}</h3><p class="small mut">${mapped.core.length+mapped.shared.length} ${t(D.stageCount)}</p></div><div class="stage-feature-grid">${mapped.core.map(stageCard).join('')}</div><details class="stage-shared" data-stage-index="${stg}"${sharedOpen[stg]?' open':''}><summary>${t(D.stageShared)} (${mapped.shared.length})</summary><div class="stage-feature-grid">${mapped.shared.map(stageCard).join('')}</div></details></div>`;
+}
+function resolveStageFeature(entry){
+ const id=typeof entry==='string'?entry:entry.id;
+ const f=FEATURES_BY_ID[id];
+ if(!f)throw new Error(`Unknown lifecycle feature: ${id}`);
+ return {feature:f,description:typeof entry==='string'||!entry.description?f.description:entry.description};
+}
+const productPill=f=>`<span class="pill product">${t(PRODUCT[f.product])}</span>`;
+function stageCard(entry){
+ const {feature:f,description}=resolveStageFeature(entry);
+ return `<article class="stage-feature" data-feature="${f.id}"><div>${pill(f.status)} ${productPill(f)}</div><h4>${t(f.name)}</h4><p>${t(description)}</p>${src(f.url)}</article>`;
+}
+function featureStageIndexes(id){
+ return STAGE_FEATURES.flatMap((s,i)=>[...s.core,...s.shared].some(entry=>(typeof entry==='string'?entry:entry.id)===id)?[i]:[]);
+}
+function renderModels(){
+ const q=$('mq').value.toLowerCase();
+ const rows=MOD.filter(m=>(!prov||m[1]===prov)&&(!q||(m[0]+' '+m[1]).toLowerCase().includes(q)));
+ const body=rows.length?rows.map(m=>`<tr><td><b>${m[0]}</b></td><td><span aria-hidden="true" style="color:${PROV[m[1]]}">●</span> ${m[1]}</td><td>${pill(m[2])}</td><td class="small mut">${t(m[3])}${m[0].startsWith('Claude Fable')?' '+src(U.models):''}</td></tr>`).join(''):`<tr><td colspan="4">${t(D.noResults)}</td></tr>`;
+ $('mtable').innerHTML=`<thead><tr><th scope="col">${t(MH.m)}</th><th scope="col">${t(MH.p)}</th><th scope="col">${t(MH.s)}</th><th scope="col">${t(MH.n)}</th></tr></thead><tbody>${body}</tbody>`;
+ $('mcount').textContent=`${rows.length} / ${MOD.length} ${t(D.shown)}`;
+ document.querySelectorAll('.prov').forEach(b=>{const selected=b.dataset.p===prov;b.classList.toggle('on',selected);b.setAttribute('aria-pressed',selected);});
+}
+function renderFeatures(){
+ const q=($('fq')||{value:''}).value.toLowerCase();
+ const rows=FEAT.filter(f=>(fRole==='all'||f.role===fRole)&&(fStat==='all'||f.status===fStat)&&(!q||(t(f.name)+' '+t(f.description)+' '+t(PRODUCT[f.product])).toLowerCase().includes(q)));
+ $('fgrid').innerHTML=rows.length?rows.map(f=>`<div class="card"><div>${pill(f.status)} ${productPill(f)} <span class="pill">${t(ROLES[f.role])}</span></div><h3 style="margin-top:6px">${t(f.name)}</h3><p class="small mut">${t(f.description)}</p><div class="feature-stages">${t(D.featureStages)}: ${featureStageIndexes(f.id).map(i=>`<a href="#sdlc" data-stage-link="${i}">${t(STAGES[i].k)}</a>`).join(' · ')}</div>${src(f.url)}</div>`).join(''):`<div class="empty-state" role="status">${t(D.noResults)}</div>`;
+ document.querySelectorAll('[data-r]').forEach(b=>{const selected=b.dataset.r===fRole;b.classList.toggle('on',selected);b.setAttribute('aria-pressed',selected);});
+ document.querySelectorAll('[data-s]').forEach(b=>{const selected=b.dataset.s===fStat;b.classList.toggle('on',selected);b.setAttribute('aria-pressed',selected);});
+}
+function renderPrint(){
+ $('print-stages').innerHTML=STAGES.map((s,i)=>`<div class="print-stage"><h3>${i+1}. ${t(s.k)}</h3><p><strong>${t(SL.what)}:</strong> ${t(s.what)}</p><p><strong>${t(SL.where)}:</strong> ${t(s.where)}</p><p><strong>${t(SL.human)}:</strong> ${t(s.human)}</p><p><strong>${t(SL.prompt)}:</strong> ${t(s.prompt)}</p>${src(s.u)}<h4>${t(D.stageFeatures)}</h4>${[...STAGE_FEATURES[i].core,...STAGE_FEATURES[i].shared].map(entry=>{const {feature:f,description}=resolveStageFeature(entry);return `<div class="print-stage-feature" data-feature="${f.id}"><strong>${t(f.name)}</strong> <span>(${t(STAT[f.status])} · ${t(PRODUCT[f.product])})</span><p>${t(description)} ${src(f.url)}</p></div>`;}).join('')}</div>`).join('');
+ $('print-models').innerHTML=`<table><thead><tr><th>${t(MH.m)}</th><th>${t(MH.p)}</th><th>${t(MH.s)}</th><th>${t(MH.n)}</th></tr></thead><tbody>`+MOD.map(m=>`<tr><td>${m[0]}</td><td>${m[1]}</td><td>${t(STAT[m[2]])}</td><td>${t(m[3])}</td></tr>`).join('')+'</tbody></table>';
+ $('print-features').innerHTML=FEAT.map(f=>`<article><h3>${t(f.name)}</h3><p>${t(STAT[f.status])} · ${t(PRODUCT[f.product])} · ${t(ROLES[f.role])}</p><p>${t(f.description)} ${src(f.url)}</p></article>`).join('');
+}
+document.addEventListener('click',e=>{
+ const link=e.target.closest('a');
+ if(link&&$('navmore').contains(link))$('navmore').open=false;
+ if(link&&link.hasAttribute('data-stage-link')){stg=Number(link.dataset.stageLink);renderTabs();}
+ const b=e.target.closest('button');if(!b)return;
+ if(b.id==='btn-en'||b.id==='btn-de'){L=b.id.slice(4);rememberLanguage(L);renderStatic();}
+ else if(b.dataset.t){stg=+b.dataset.t;renderTabs();}
+ else if(b.dataset.p){prov=prov===b.dataset.p?null:b.dataset.p;renderModels();}
+ else if(b.dataset.r){fRole=b.dataset.r;renderFeatures();}
+ else if(b.dataset.s){fStat=b.dataset.s;renderFeatures();}
+});
+$('tabs').addEventListener('keydown',e=>{
+ if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key))return;
+ e.preventDefault();
+ stg=e.key==='Home'?0:e.key==='End'?STAGES.length-1:(stg+(e.key==='ArrowRight'?1:STAGES.length-1))%STAGES.length;
+ renderTabs();$('tabs').querySelector('[aria-selected=true]').focus();
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&$('navmore').open){$('navmore').open=false;$('navmore').querySelector('summary').focus();}
+});
+$('mq').addEventListener('input',renderModels);
+if('IntersectionObserver' in window){
+ const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)document.querySelectorAll('#navlinks a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+en.target.id));}),{rootMargin:'-40% 0px -55% 0px'});
+ document.querySelectorAll('main section').forEach(s=>io.observe(s));
+}
+let printFaqState=[];
+window.addEventListener('beforeprint',()=>{printFaqState=[...document.querySelectorAll('#faqs details')].map(d=>d.open);document.querySelectorAll('#faqs details').forEach(d=>d.open=true);renderPrint();});
+window.addEventListener('afterprint',()=>document.querySelectorAll('#faqs details').forEach((d,i)=>d.open=Boolean(printFaqState[i])));
+renderStatic();
+</script>
+</body>
+</html>
